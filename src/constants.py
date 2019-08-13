@@ -8,3 +8,7 @@ class CareerCenters:
     PEABODY = 'Peabody Career Services (LAUNCHPad)'
     AAP = 'AAP Career Services (KSAS)'
     EDUCATION = 'School of Education Career Services'
+
+
+HANDSHAKE_URL = 'https://jhu.joinhandshake.com'
+HANDSHAKE_EMAIL = 'cedwar42@jhu.edu'
