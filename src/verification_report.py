@@ -75,7 +75,7 @@ def format_report(report: dict) -> str:
     return result
 
 
-def verify_rules(rules: List[tuple] = None) -> List[dict]:
+def verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
     """Given a list of rules to check and their associated data, verify the rules.
 
     :param rules: a list of tuples of the form: (verification_func, data)
