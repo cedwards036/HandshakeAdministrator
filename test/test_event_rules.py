@@ -23,6 +23,27 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
                          jhu_owned_events_are_prefixed_correctly(event_data))
 
+    def test_university_wide_is_valid(self):
+        event_data = [
+            {
+                'events.id': "353242",
+                'events.name': "University-Wide: 2019 JumpStart STEM Diversity Forum",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD
+            },
+            {
+                'events.id': "8563254",
+                'events.name': "University-Wide: Drop-in Mondays HE September 9th Afternoon",
+                'career_center_on_events.name': CareerCenters.CAREY
+            },
+            {
+                'events.id': "902820",
+                'events.name': "University-Wide: Career Clinic: Job Negotiation",
+                'career_center_on_events.name': CareerCenters.PDCO
+            },
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, True),
+                         jhu_owned_events_are_prefixed_correctly(event_data))
+
     def test_with_one_of_each_bad_event(self):
         event_data = [
             {
@@ -37,7 +58,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
             },
             {
                 'events.id': "902820",
-                'events.name': "Career Clinic: Job Negotiation",
+                'events.name': "Univ. Wide: Career Clinic: Job Negotiation",
                 'career_center_on_events.name': CareerCenters.PDCO
             },
             {
@@ -69,7 +90,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         expected_errors = [
             'Event 353242 (Homewoo: 2019 JumpStart STEM Diversity Forum) should have prefix "Homewood:"',
             'Event 8563254 (Cary: Drop-in Mondays HE September 9th Afternoon) should have prefix "Carey:"',
-            'Event 902820 (Career Clinic: Job Negotiation) should have prefix "PDCO:"',
+            'Event 902820 (Univ. Wide: Career Clinic: Job Negotiation) should have prefix "PDCO:"',
             'Event 2635346 (SAIS Europe SAISLeads Retreat) should have prefix "SAIS DC:", "SAIS Europe:", or "HNC:"',
             'Event 526433 (N: How to Find Your First Nursing Job) should have prefix "Nursing:"',
             'Event 328092 (Strategies for Effective Professional Communication webinar) should have prefix "AAP:"',

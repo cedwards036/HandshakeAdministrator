@@ -31,7 +31,7 @@ def jhu_owned_events_are_prefixed_correctly(events: list) -> VerificationResult:
 
 
 def _get_event_prefix_error(event: dict):
-    if not event['career_center_on_events.name']:
+    if not event['career_center_on_events.name'] or event['events.name'].startswith('University-Wide'):
         return None
     desired_prefixes = CAREER_CENTER_PREFIXES[event['career_center_on_events.name']]
     for prefix in desired_prefixes:
