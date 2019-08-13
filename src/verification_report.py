@@ -35,6 +35,9 @@ class VerificationResult:
     def __eq__(self, other):
         return self._data == other._data
 
+    def __str__(self):
+        return str(self._data)
+
 
 def generate_report(rule_results: List[VerificationResult]) -> dict:
     """
