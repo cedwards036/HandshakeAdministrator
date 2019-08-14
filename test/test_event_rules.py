@@ -44,6 +44,36 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
                          jhu_owned_events_are_prefixed_correctly(event_data))
 
+    def test_cancelled_prefix_is_valid(self):
+        event_data = [
+            {
+                'events.id': "353242",
+                'events.name': "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD
+            },
+            {
+                'events.id': "8563254",
+                'events.name': "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
+                'career_center_on_events.name': CareerCenters.CAREY
+            },
+            {
+                'events.id': "902820",
+                'events.name': "CANCELLED: Career Clinic: Job Negotiation",
+                'career_center_on_events.name': CareerCenters.PDCO
+            },
+            {
+                'events.id': "2635346",
+                'events.name': "CANCELLED: SAISLeads Retreat",
+                'career_center_on_events.name': CareerCenters.SAIS
+            },
+        ]
+        expected_errors = [
+            'Event 902820 (CANCELLED: Career Clinic: Job Negotiation) should have prefix "CANCELLED: PDCO:"',
+            'Event 2635346 (CANCELLED: SAISLeads Retreat) should have prefix "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"'
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
+                         jhu_owned_events_are_prefixed_correctly(event_data))
+
     def test_with_one_of_each_bad_event(self):
         event_data = [
             {
