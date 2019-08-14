@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 
 class VerificationResult:
@@ -39,7 +39,35 @@ class VerificationResult:
         return str(self._data)
 
 
-def generate_report(rule_results: List[VerificationResult]) -> dict:
+def run_rule_verifications(rules: List[tuple] = None, callback: Callable = print):
+    """
+    Given a list of rules to check and their associated data, verify the rules and output a report.
+
+    :param rules: a list of tuples of the form: (verification_func, data)
+    :param callback: a function to which to pass the generated report. For example,
+                     pass "print" to print the report to the console, or pass a
+                     function that writes the report to a file on disk.
+    """
+    verification_results = _verify_rules(rules)
+    report = _generate_report(verification_results)
+    callback(_format_report(report))
+
+
+def _verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
+    """Given a list of rules to check and their associated data, verify the rules.
+
+    :param rules: a list of tuples of the form: (verification_func, data)
+    :returns: a list of rule result dicts, one for each rule that was tested
+    """
+    if not rules:
+        return []
+    results = []
+    for rule in rules:
+        results.append(rule[0](rule[1]))
+    return results
+
+
+def _generate_report(rule_results: List[VerificationResult]) -> dict:
     """
     Given a list of rule verification results, create a summary report.
 
@@ -58,7 +86,7 @@ def generate_report(rule_results: List[VerificationResult]) -> dict:
     return report
 
 
-def format_report(report: dict) -> str:
+def _format_report(report: dict) -> str:
     """Given a rule result report object, create a printable report"""
     result = '================== Verification Report ===================\n'
     if report['verified']:
@@ -73,17 +101,3 @@ def format_report(report: dict) -> str:
                 result += f'        {error}\n'
     result += f'\n================== {len(report["verified"])} verified, {len(report["broken"])} broken =================='
     return result
-
-
-def verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
-    """Given a list of rules to check and their associated data, verify the rules.
-
-    :param rules: a list of tuples of the form: (verification_func, data)
-    :returns: a list of rule result dicts, one for each rule that was tested
-    """
-    if not rules:
-        return []
-    results = []
-    for rule in rules:
-        results.append(rule[0](rule[1]))
-    return results

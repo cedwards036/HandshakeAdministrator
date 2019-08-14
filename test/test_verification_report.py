@@ -1,7 +1,7 @@
 import unittest
 
-from src.verification_report import (VerificationResult, generate_report,
-                                     format_report, verify_rules)
+from src.verification_report import (VerificationResult, _generate_report,
+                                     _format_report, _verify_rules)
 
 
 class TestVerificationReport(unittest.TestCase):
@@ -10,20 +10,20 @@ class TestVerificationReport(unittest.TestCase):
         self.assertEqual({
             'verified': [],
             'broken': {}
-        }, generate_report([]))
+        }, _generate_report([]))
 
     def test_report_with_one_verified_result(self):
         self.assertEqual({
             'verified': ['All dogs should be cute'],
             'broken': {}
-        }, generate_report([VerificationResult('All dogs should be cute', True)]))
+        }, _generate_report([VerificationResult('All dogs should be cute', True)]))
 
     def test_report_with_verified_and_unverified_results(self):
         self.assertEqual({
             'verified': ['All dogs should be cute'],
             'broken': {'All numbers should be even': ['3 is not even', '5 is not even']}
-        }, generate_report([VerificationResult('All dogs should be cute', True),
-                            VerificationResult('All numbers should be even', False,
+        }, _generate_report([VerificationResult('All dogs should be cute', True),
+                             VerificationResult('All numbers should be even', False,
                                                ['3 is not even', '5 is not even'])]))
 
     def test_format_report_with_no_results(self):
@@ -34,7 +34,7 @@ class TestVerificationReport(unittest.TestCase):
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     '================== 0 verified, 0 broken ==================')
-        self.assertEqual(expected, format_report(test_report))
+        self.assertEqual(expected, _format_report(test_report))
 
     def test_format_report_with_one_verified(self):
         test_report = {
@@ -48,7 +48,7 @@ class TestVerificationReport(unittest.TestCase):
                     '    All dogs should be cute\n'
                     '\n'
                     '================== 1 verified, 0 broken ==================')
-        self.assertEqual(expected, format_report(test_report))
+        self.assertEqual(expected, _format_report(test_report))
 
     def test_format_report_with_one_broken(self):
         test_report = {
@@ -64,7 +64,7 @@ class TestVerificationReport(unittest.TestCase):
                     '        5 is not even\n'
                     '\n'
                     '================== 0 verified, 1 broken ==================')
-        self.assertEqual(expected, format_report(test_report))
+        self.assertEqual(expected, _format_report(test_report))
 
     def test_format_report_with_mutliple_of_each(self):
         test_report = {
@@ -97,17 +97,17 @@ class TestVerificationReport(unittest.TestCase):
                     '        Scout ate two hundred hot dogs\n'
                     '\n'
                     '================== 2 verified, 2 broken ==================')
-        self.assertEqual(expected, format_report(test_report))
+        self.assertEqual(expected, _format_report(test_report))
 
 
 class TestVerifyRules(unittest.TestCase):
 
     def test_verify_no_rules(self):
-        self.assertEqual([], verify_rules())
-        self.assertEqual([], verify_rules([]))
+        self.assertEqual([], _verify_rules())
+        self.assertEqual([], _verify_rules([]))
 
     def test_verify_one_rule(self):
-        self.assertEqual([{'field1': 193, 'field2': 4}], verify_rules([
+        self.assertEqual([{'field1': 193, 'field2': 4}], _verify_rules([
             (lambda x: {'field1': x['f1'], 'field2': x['f2']}, {'f1': 193, 'f2': 4})
         ]))
 
@@ -133,7 +133,7 @@ class TestVerifyRules(unittest.TestCase):
                                ['5 is odd', '7 is odd'])
         ]
 
-        self.assertEqual(expected, verify_rules([
+        self.assertEqual(expected, _verify_rules([
             (func1, data1),
             (func2, data2)
         ]))
