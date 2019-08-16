@@ -1,7 +1,10 @@
 import unittest
 
 from src.constants import CareerCenters
-from src.event_rules import jhu_owned_events_are_prefixed_correctly
+from src.event_rules import (
+    jhu_owned_events_are_prefixed_correctly,
+    events_are_invite_only_iff_not_university_wide
+)
 from src.verification_report import VerificationResult
 
 
@@ -241,3 +244,113 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
                          jhu_owned_events_are_prefixed_correctly(event_data))
+
+
+class TestEventsAreInviteOnly(unittest.TestCase):
+    RULE_NAME = 'Events are invite-only if and only if they are not University-Wide or external'
+
+    def test_no_data(self):
+        self.assertEqual(VerificationResult(self.RULE_NAME, True),
+                         events_are_invite_only_iff_not_university_wide([]))
+
+    def test_non_career_center_events(self):
+        event_data = [
+            {
+                'events.id': "4324725",
+                'events.name': "McKinsey Virtual Session",
+                'career_center_on_events.name': None,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "4625224",
+                'events.name': "CIA Recruitment Event",
+                'career_center_on_events.name': None,
+                'events.invite_only': 'Yes'
+            },
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, True),
+                         events_are_invite_only_iff_not_university_wide(event_data))
+
+    def test_university_wide_events(self):
+        event_data = [
+            {
+                'events.id': "6336475",
+                'events.name': "University-Wide: Consulting Alumni Panel",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "9892820",
+                'events.name': "University-Wide: Resume Workshop",
+                'career_center_on_events.name': CareerCenters.CAREY,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "8290282",
+                'events.name': "University-Wide: Resume Workshop",
+                'career_center_on_events.name': CareerCenters.PDCO,
+                'events.invite_only': 'Yes'
+            },
+        ]
+        expected_errors = ['Event 8290282 (University-Wide: Resume Workshop) should not be invite-only']
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
+                         events_are_invite_only_iff_not_university_wide(event_data))
+
+    def test_career_center_events(self):
+        event_data = [
+            {
+                'events.id': "38305945",
+                'events.name': "Homewood: Consulting Alumni Panel",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "150925098",
+                'events.name': "Carey: Resume Workshop",
+                'career_center_on_events.name': CareerCenters.CAREY,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "95739393",
+                'events.name': "PDCO: Resume Workshop",
+                'career_center_on_events.name': CareerCenters.PDCO,
+                'events.invite_only': 'Yes'
+            },
+        ]
+        expected_errors = ['Event 38305945 (Homewood: Consulting Alumni Panel) should be invite-only',
+                           'Event 150925098 (Carey: Resume Workshop) should be invite-only']
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
+                         events_are_invite_only_iff_not_university_wide(event_data))
+
+    def test_cancelled_prefix_doesnt_interefere(self):
+        event_data = [
+            {
+                'events.id': "353242",
+                'events.name': "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'events.invite_only': 'Yes'
+            },
+            {
+                'events.id': "8563254",
+                'events.name': "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
+                'career_center_on_events.name': CareerCenters.CAREY,
+                'events.invite_only': 'Yes'
+            },
+            {
+                'events.id': "902820",
+                'events.name': "CANCELLED: University-Wide: Career Clinic: Job Negotiation",
+                'career_center_on_events.name': CareerCenters.PDCO,
+                'events.invite_only': 'No'
+            },
+            {
+                'events.id': "2635346",
+                'events.name': "CANCELLED: SAIS DC: SAISLeads Retreat",
+                'career_center_on_events.name': CareerCenters.SAIS,
+                'events.invite_only': 'No'
+            },
+        ]
+        expected_errors = [
+            'Event 353242 (CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum) should not be invite-only',
+            'Event 2635346 (CANCELLED: SAIS DC: SAISLeads Retreat) should be invite-only']
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
+                         events_are_invite_only_iff_not_university_wide(event_data))
