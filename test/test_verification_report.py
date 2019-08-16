@@ -1,7 +1,8 @@
 import unittest
 
-from src.verification_report import (VerificationResult, _generate_report,
-                                     _format_report, _verify_rules)
+from src.rule_verification import VerificationResult
+from src.verification_report import (_generate_report, _format_report,
+                                     _verify_rules)
 
 
 class TestVerificationReport(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestVerificationReport(unittest.TestCase):
             'broken': {'All numbers should be even': ['3 is not even', '5 is not even']}
         }, _generate_report([VerificationResult('All dogs should be cute', True),
                              VerificationResult('All numbers should be even', False,
-                                               ['3 is not even', '5 is not even'])]))
+                                                ['3 is not even', '5 is not even'])]))
 
     def test_format_report_with_no_results(self):
         test_report = {

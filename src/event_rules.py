@@ -1,8 +1,12 @@
 from typing import List
 
 from src.constants import CareerCenters
+from src.rule_verification import make_rule
 from src.utils import create_or_list_from
-from src.verification_report import VerificationResult
+
+#############
+# CONSTANTS
+#############
 
 CAREER_CENTER_PREFIXES = {
     CareerCenters.HOMEWOOD: ['Homewood:'],
@@ -19,21 +23,9 @@ UNIVERSITY_WIDE_PREFIX = 'University-Wide:'
 CANCELLED_PREFIX = 'CANCELLED:'
 
 
-def jhu_owned_events_are_prefixed_correctly(events: List[dict]) -> VerificationResult:
-    """Rule: all events that are controlled by a JHU career center must have the correct prefix in their name"""
-    result = VerificationResult(
-        rule='Events are prefixed correctly if they are owned by a career center',
-        is_verified=False,
-        errors=[]
-    )
-    for event in events:
-        error = _get_event_prefix_error(event)
-        if error:
-            result.add_error(error)
-    if len(result.errors) == 0:
-        result.is_verified = True
-    return result
-
+########################
+# HELPER/SUB-FUNCTIONS
+########################
 
 def _get_event_prefix_error(event: dict):
     if not event['career_center_on_events.name']:
@@ -72,25 +64,6 @@ def _build_event_prefix_error_str(event: dict, valid_prefixes: List[str]) -> str
             f'prefix {create_or_list_from(valid_prefixes)}')
 
 
-def events_are_invite_only_iff_not_university_wide(events: List[dict]) -> VerificationResult:
-    """
-    Rule: Events should be marked invite-only if and only if they are not
-    University-Wide or external
-    """
-    result = VerificationResult(
-        rule='Events are invite-only if and only if they are not University-Wide or external',
-        is_verified=False,
-        errors=[]
-    )
-    for event in events:
-        error = _get_invite_error(event)
-        if error:
-            result.add_error(error)
-    if len(result.errors) == 0:
-        result.is_verified = True
-    return result
-
-
 def _get_invite_error(event: dict):
     if not event['career_center_on_events.name']:
         return None
@@ -114,3 +87,18 @@ def _build_invite_only_error_string(event: dict, should_be_invite_only: bool) ->
     else:
         imperative = 'should not'
     return (f'Event {event["events.id"]} ({event["events.name"]}) {imperative} be invite-only')
+
+
+############################
+# RULES
+############################
+
+jhu_owned_events_are_prefixed_correctly = make_rule(
+    'Events are prefixed correctly if they are owned by a career center',
+    _get_event_prefix_error
+)
+
+events_are_invite_only_iff_not_university_wide = make_rule(
+    'Events are invite-only if and only if they are not University-Wide or external',
+    _get_invite_error
+)

@@ -8,6 +8,7 @@ def print_and_write_to_file(text, file_path):
     except FileNotFoundError as e:
         print(f'Unable to write results to file. {str(e)}')
 
+
 def create_or_list_from(items: list) -> str:
     """
     Create a string like '"item1", "item2", or "item3"' from a list of items.
