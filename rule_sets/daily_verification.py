@@ -8,12 +8,13 @@ from src.event_rules import (
 from src.utils import print_and_write_to_file
 from src.verification_report import run_rule_verifications
 
-EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vZXZlbnRzP3FpZD1VNm5rVlhJZWdIZEJINUZ3SThrVzJNJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
+EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vZXZlbnRzP3FpZD02aEZwc2JlQ2wzMVROUkpZTU5Xa043JmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
 REPORT_FILEPATH = 'C:\\Users\\cedwar42\\Downloads\\event_rule_verification_results.txt'
 
 
 def handle_event_rule_report(report_text: str):
     print_and_write_to_file(report_text, REPORT_FILEPATH)
+
 
 with HandshakeSession(HANDSHAKE_URL, HANDSHAKE_EMAIL) as browser:
     events_insights = InsightsPage(EVENTS_INSIGHTS_LINK, browser)
