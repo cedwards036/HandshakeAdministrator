@@ -1,8 +1,7 @@
 import unittest
 
 from src.rule_verification import VerificationResult
-from src.verification_report import (_generate_report, _format_report,
-                                     _verify_rules)
+from src.verification_report import VerificationReport, _verify_rules
 
 
 class TestVerificationReport(unittest.TestCase):
@@ -11,37 +10,31 @@ class TestVerificationReport(unittest.TestCase):
         self.assertEqual({
             'verified': [],
             'broken': {}
-        }, _generate_report([]))
+        }, VerificationReport([]).as_dict())
 
     def test_report_with_one_verified_result(self):
         self.assertEqual({
             'verified': ['All dogs should be cute'],
             'broken': {}
-        }, _generate_report([VerificationResult('All dogs should be cute', True)]))
+        }, VerificationReport([VerificationResult('All dogs should be cute', True)]).as_dict())
 
     def test_report_with_verified_and_unverified_results(self):
         self.assertEqual({
             'verified': ['All dogs should be cute'],
             'broken': {'All numbers should be even': ['3 is not even', '5 is not even']}
-        }, _generate_report([VerificationResult('All dogs should be cute', True),
-                             VerificationResult('All numbers should be even', False,
-                                                ['3 is not even', '5 is not even'])]))
+        }, VerificationReport([VerificationResult('All dogs should be cute', True),
+                               VerificationResult('All numbers should be even', False,
+                                                  ['3 is not even', '5 is not even'])]).as_dict())
 
-    def test_format_report_with_no_results(self):
-        test_report = {
-            'verified': [],
-            'broken': []
-        }
+    def test_report_str_with_no_results(self):
+        test_report = VerificationReport([])
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     '================== 0 verified, 0 broken ==================')
-        self.assertEqual(expected, _format_report(test_report))
+        self.assertEqual(expected, str(test_report))
 
-    def test_format_report_with_one_verified(self):
-        test_report = {
-            'verified': ['All dogs should be cute'],
-            'broken': []
-        }
+    def test_report_str_with_one_verified(self):
+        test_report = VerificationReport([VerificationResult('All dogs should be cute', True)])
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     'Rules verified:\n'
@@ -49,13 +42,11 @@ class TestVerificationReport(unittest.TestCase):
                     '    All dogs should be cute\n'
                     '\n'
                     '================== 1 verified, 0 broken ==================')
-        self.assertEqual(expected, _format_report(test_report))
+        self.assertEqual(expected, str(test_report))
 
-    def test_format_report_with_one_broken(self):
-        test_report = {
-            'verified': [],
-            'broken': {'All numbers should be even': ['3 is not even', '5 is not even']}
-        }
+    def test_report_str_with_one_broken(self):
+        test_report = VerificationReport(
+            [VerificationResult('All numbers should be even', False, ['3 is not even', '5 is not even'])])
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     'Rules broken:\n'
@@ -65,21 +56,22 @@ class TestVerificationReport(unittest.TestCase):
                     '        5 is not even\n'
                     '\n'
                     '================== 0 verified, 1 broken ==================')
-        self.assertEqual(expected, _format_report(test_report))
+        self.assertEqual(expected, str(test_report))
 
-    def test_format_report_with_mutliple_of_each(self):
-        test_report = {
-            'verified': ['All dogs should be good', 'All cats should be ok I guess'],
-            'broken': {
-                'All numbers should be even': [
-                    '3 is not even',
-                    '5 is not even'],
-                'People should eat no more than four hot dogs at a time': [
-                    'Jimmy ate five hot dogs',
-                    'Sarah ate thirty hot dogs',
-                    'Scout ate two hundred hot dogs'
-                ]}
-        }
+    def test_report_str_with_mutliple_of_each(self):
+        test_report = VerificationReport([
+            VerificationResult('All dogs should be good', True),
+            VerificationResult('All cats should be ok I guess', True),
+            VerificationResult('All numbers should be even', False, [
+                '3 is not even',
+                '5 is not even'
+            ]),
+            VerificationResult('People should eat no more than four hot dogs at a time', False, [
+                'Jimmy ate five hot dogs',
+                'Sarah ate thirty hot dogs',
+                'Scout ate two hundred hot dogs'
+            ])
+        ])
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     'Rules verified:\n'
@@ -98,7 +90,7 @@ class TestVerificationReport(unittest.TestCase):
                     '        Scout ate two hundred hot dogs\n'
                     '\n'
                     '================== 2 verified, 2 broken ==================')
-        self.assertEqual(expected, _format_report(test_report))
+        self.assertEqual(expected, str(test_report))
 
 
 class TestVerifyRules(unittest.TestCase):
