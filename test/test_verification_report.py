@@ -26,6 +26,29 @@ class TestVerificationReport(unittest.TestCase):
                                VerificationResult('All numbers should be even', False,
                                                   ['3 is not even', '5 is not even'])]).as_dict())
 
+    def test_verification_report_equality(self):
+        no_results = VerificationReport([])
+        one_result = VerificationReport([VerificationResult('All dogs should be cute', True)])
+        three_results = VerificationReport([
+            VerificationResult('All dogs should be good', True),
+            VerificationResult('All cats should be ok I guess', True),
+            VerificationResult('All numbers should be even', False, [
+                '3 is not even',
+                '5 is not even'
+            ])])
+
+        self.assertEqual(VerificationReport([]), no_results)
+        self.assertEqual(VerificationReport([VerificationResult('All dogs should be cute', True)]),
+                         one_result)
+        self.assertNotEqual(VerificationReport([VerificationResult('All cats should be cute', True)]), one_result)
+        self.assertEqual(VerificationReport([
+            VerificationResult('All dogs should be good', True),
+            VerificationResult('All cats should be ok I guess', True),
+            VerificationResult('All numbers should be even', False, [
+                '3 is not even',
+                '5 is not even'
+            ])]), three_results)
+
     def test_report_str_with_no_results(self):
         test_report = VerificationReport([])
         expected = ('================== Verification Report ===================\n'
