@@ -11,7 +11,7 @@ from src.utils import create_or_list_from
 CAREER_CENTER_PREFIXES = {
     CareerCenters.HOMEWOOD: ['Homewood:'],
     CareerCenters.CAREY: ['Carey:'],
-    CareerCenters.SAIS: ['SAIS DC:', 'SAIS Europe:', 'HNC:'],
+    CareerCenters.SAIS: ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:'],
     CareerCenters.PDCO: ['PDCO:'],
     CareerCenters.NURSING: ['Nursing:'],
     CareerCenters.BSPH: ['BSPH:'],

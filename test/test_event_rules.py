@@ -72,7 +72,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         ]
         expected_errors = [
             'Event 902820 (CANCELLED: Career Clinic: Job Negotiation) should have prefix "CANCELLED: PDCO:"',
-            'Event 2635346 (CANCELLED: SAISLeads Retreat) should have prefix "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"'
+            'Event 2635346 (CANCELLED: SAISLeads Retreat) should have prefix "CANCELLED: SAIS:", "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"'
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
                          jhu_owned_events_are_prefixed_correctly(event_data))
@@ -124,7 +124,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
             'Event 353242 (Homewoo: 2019 JumpStart STEM Diversity Forum) should have prefix "Homewood:"',
             'Event 8563254 (Cary: Drop-in Mondays HE September 9th Afternoon) should have prefix "Carey:"',
             'Event 902820 (Univ. Wide: Career Clinic: Job Negotiation) should have prefix "PDCO:"',
-            'Event 2635346 (SAIS Europe SAISLeads Retreat) should have prefix "SAIS DC:", "SAIS Europe:", or "HNC:"',
+            'Event 2635346 (SAIS Europe SAISLeads Retreat) should have prefix "SAIS:", "SAIS DC:", "SAIS Europe:", or "HNC:"',
             'Event 526433 (N: How to Find Your First Nursing Job) should have prefix "Nursing:"',
             'Event 328092 (Strategies for Effective Professional Communication webinar) should have prefix "AAP:"',
             'Event 940935 (Homewood: LAUNCH @ Lunch) should have prefix "Peabody:"',
@@ -149,6 +149,11 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 'events.id': "333931",
                 'events.name': "PDCO: Career Clinic: Job Negotiation",
                 'career_center_on_events.name': CareerCenters.PDCO
+            },
+            {
+                'events.id': "2938025",
+                'events.name': "SAIS: Online Webinar",
+                'career_center_on_events.name': CareerCenters.SAIS
             },
             {
                 'events.id': "317809",
