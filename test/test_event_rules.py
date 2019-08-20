@@ -77,6 +77,32 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
                          jhu_owned_events_are_prefixed_correctly(event_data))
 
+    def test_canceled_misspelling_gives_helpful_feedback(self):
+        event_data = [
+            {
+                'events.id': "902820",
+                'events.name': "CANCELED: PDCO: Career Clinic: Job Negotiation",
+                'career_center_on_events.name': CareerCenters.PDCO
+            },
+            {
+                'events.id': "2635346",
+                'events.name': "CAnCELEd: SAIS: SAISLeads Retreat",
+                'career_center_on_events.name': CareerCenters.SAIS
+            },
+            {
+                'events.id': "3263343",
+                'events.name': "Cancelled: Peabody: Launch Event",
+                'career_center_on_events.name': CareerCenters.PEABODY
+            }
+        ]
+        expected_errors = [
+            'Event 902820 (CANCELED: PDCO: Career Clinic: Job Negotiation) should have prefix "CANCELLED: PDCO:"',
+            'Event 2635346 (CAnCELEd: SAIS: SAISLeads Retreat) should have prefix "CANCELLED: SAIS:", "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"',
+            'Event 3263343 (Cancelled: Peabody: Launch Event) should have prefix "CANCELLED: Peabody:"'
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
+                         jhu_owned_events_are_prefixed_correctly(event_data))
+
     def test_with_one_of_each_bad_event(self):
         event_data = [
             {

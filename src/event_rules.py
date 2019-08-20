@@ -39,7 +39,7 @@ def _get_event_prefix_error(event: dict):
             for prefix in valid_prefixes:
                 if cleaned_event_name.startswith(prefix):
                     return None
-            if event['events.name'].startswith(CANCELLED_PREFIX):
+            if _event_was_intended_to_be_cancelled(event['events.name']):
                 valid_prefixes = _add_cancelled_to_prefixes(valid_prefixes)
             return _build_event_prefix_error_str(event, valid_prefixes)
 
@@ -53,6 +53,23 @@ def _get_cleaned_event_name(event_name: str) -> str:
 
 def _event_is_university_wide(event_name: str) -> bool:
     return event_name.startswith(UNIVERSITY_WIDE_PREFIX)
+
+
+def _event_was_intended_to_be_cancelled(event_name: str) -> bool:
+    return (
+            event_name.startswith(CANCELLED_PREFIX) or
+            _event_has_malformed_cancelled_prefix(event_name)
+    )
+
+
+def _event_has_malformed_cancelled_prefix(event_name: str) -> bool:
+    return (
+            not event_name.startswith(CANCELLED_PREFIX) and (
+            event_name.lower().startswith('cancelled') or
+            event_name.lower().startswith('canceled')
+    )
+    )
+
 
 
 def _add_cancelled_to_prefixes(prefixes: List[str]) -> List[str]:
