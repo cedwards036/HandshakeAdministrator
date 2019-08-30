@@ -47,6 +47,31 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
                          jhu_owned_events_are_prefixed_correctly(event_data))
 
+    def test_test_prefix_is_valid(self):
+        event_data = [
+            {
+                'events.id': "3463254",
+                'events.name': "Test: 2019 JumpStart STEM Diversity Forum",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD
+            },
+            {
+                'events.id': "5364354",
+                'events.name': "test- Drop-in Mondays HE September 9th Afternoon",
+                'career_center_on_events.name': CareerCenters.PDCO
+            },
+            {
+                'events.id': "26895576",
+                'events.name': "TESTING Career Clinic: Job Negotiation",
+                'career_center_on_events.name': CareerCenters.SAIS
+            },
+        ]
+        expected_errors = [
+            'Event 5364354 (test- Drop-in Mondays HE September 9th Afternoon) should have prefix "PDCO:"',
+            'Event 26895576 (TESTING Career Clinic: Job Negotiation) should have prefix "SAIS:", "SAIS DC:", "SAIS Europe:", or "HNC:"'
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
+                         jhu_owned_events_are_prefixed_correctly(event_data))
+
     def test_cancelled_prefix_is_valid(self):
         event_data = [
             {

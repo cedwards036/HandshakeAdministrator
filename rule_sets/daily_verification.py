@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from autohandshake import HandshakeSession, InsightsPage
 
 from src.appointment_rules import past_appointments_have_finalized_status
@@ -21,6 +23,8 @@ def handle_daily_rule_report(report: VerificationReport):
 
 with HandshakeSession(HANDSHAKE_URL, HANDSHAKE_EMAIL) as browser:
     events_insights = InsightsPage(EVENTS_INSIGHTS_LINK, browser)
+    events_insights.set_date_range_filter('Events', 'Start Date Date', datetime(2018, 7, 1).date(),
+                                          datetime(2019, 7, 1).date())
     events = events_insights.get_data()
 
     appts_insights = InsightsPage(APPTS_INSIGHTS_LINK, browser)

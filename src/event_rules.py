@@ -21,6 +21,7 @@ CAREER_CENTER_PREFIXES = {
 
 UNIVERSITY_WIDE_PREFIX = 'University-Wide:'
 CANCELLED_PREFIX = 'CANCELLED:'
+TEST_PREFIX = 'Test:'
 
 
 ########################
@@ -32,7 +33,7 @@ def _get_event_prefix_error(event: dict):
         return None
     else:
         cleaned_event_name = _get_cleaned_event_name(event['events.name'])
-        if _event_is_university_wide(cleaned_event_name):
+        if _event_is_university_wide(cleaned_event_name) or _event_is_a_test_event(cleaned_event_name):
             return None
         else:
             valid_prefixes = CAREER_CENTER_PREFIXES[event['career_center_on_events.name']]
@@ -55,6 +56,10 @@ def _event_is_university_wide(event_name: str) -> bool:
     return event_name.startswith(UNIVERSITY_WIDE_PREFIX)
 
 
+def _event_is_a_test_event(event_name: str) -> bool:
+    return event_name.startswith(TEST_PREFIX)
+
+
 def _event_was_intended_to_be_cancelled(event_name: str) -> bool:
     return (
             event_name.startswith(CANCELLED_PREFIX) or
@@ -67,9 +72,7 @@ def _event_has_malformed_cancelled_prefix(event_name: str) -> bool:
             not event_name.startswith(CANCELLED_PREFIX) and (
             event_name.lower().startswith('cancelled') or
             event_name.lower().startswith('canceled')
-    )
-    )
-
+    ))
 
 
 def _add_cancelled_to_prefixes(prefixes: List[str]) -> List[str]:
