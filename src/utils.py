@@ -92,6 +92,19 @@ def write_to_file(text: str, file_path):
         print(f'Unable to write results to file. {str(e)}')
 
 
+def read_and_delete_json(filepath: str) -> List[dict]:
+    """
+    Read the given json file into a list of dicts, then delete the file
+
+    :param filepath: the filepath of the json file to read
+    :return: a list of dicts representing the json data
+    """
+    with open(filepath, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    os.remove(filepath)
+    return data
+
+
 def create_or_list_from(items: list) -> str:
     """
     Create a string like '"item1", "item2", or "item3"' from a list of items.
