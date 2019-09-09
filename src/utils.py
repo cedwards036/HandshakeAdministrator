@@ -1,4 +1,42 @@
-def print_and_write_to_file(text, file_path):
+from csv import DictWriter
+from typing import List
+
+from autohandshake import HandshakeSession
+
+from src.constants import HANDSHAKE_URL, HANDSHAKE_EMAIL
+
+
+class BrowsingSession(HandshakeSession):
+    """
+    A wrapper class around HandshakeSession that always logs into the account
+    specified in the config file.
+    """
+
+    def __init__(self, max_wait_time=300):
+        super().__init__(HANDSHAKE_URL, HANDSHAKE_EMAIL, max_wait_time=max_wait_time)
+
+
+def to_csv(list_of_dicts: List[dict], file_path: str):
+    """
+    Write the given list of dicts to a csv at the given file path.
+
+    The dictionaries should have a uniform structure, i.e. they should be parsable
+    into the rows of the csv, with the keys equivalent to column names.
+
+    :param list_of_dicts: the list to write to a file
+    :type list_of_dicts: list
+    :param file_path: the file path at which to create the file
+    :type file_path: str
+    """
+
+    keys = list_of_dicts[0].keys()
+    with open(file_path, 'w', encoding='utf-8') as output_file:
+        dict_writer = DictWriter(output_file, keys, lineterminator='\n')
+        dict_writer.writeheader()
+        dict_writer.writerows(list_of_dicts)
+
+
+def print_and_write_to_file(text: str, file_path):
     """Write the given string to a file at the given filepath"""
     print(text)
     try:

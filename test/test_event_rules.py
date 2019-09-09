@@ -1,11 +1,11 @@
 import unittest
 
 from src.constants import CareerCenters
-from src.event_rules import (
+from src.rule_verification import VerificationResult
+from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
     events_are_invite_only_iff_not_university_wide
 )
-from src.rule_verification import VerificationResult
 
 
 class TestEventsArePrefixedCorrectly(unittest.TestCase):

@@ -1,10 +1,10 @@
 import unittest
 from datetime import datetime, timedelta
 
-from src.appointment_rules import (
+from src.rule_verification import VerificationResult
+from src.rules.appointment_rules import (
     past_appointments_have_finalized_status
 )
-from src.rule_verification import VerificationResult
 
 
 class TestAppointmentStatusCompleted(unittest.TestCase):

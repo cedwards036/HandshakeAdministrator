@@ -2,9 +2,9 @@ from datetime import datetime
 
 from autohandshake import HandshakeSession, InsightsPage
 
-from src.appointment_rules import past_appointments_have_finalized_status
 from src.constants import HANDSHAKE_EMAIL, HANDSHAKE_URL
-from src.event_rules import (
+from src.rules.appointment_rules import past_appointments_have_finalized_status
+from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
     events_are_invite_only_iff_not_university_wide
 )
@@ -23,8 +23,8 @@ def handle_daily_rule_report(report: VerificationReport):
 
 with HandshakeSession(HANDSHAKE_URL, HANDSHAKE_EMAIL) as browser:
     events_insights = InsightsPage(EVENTS_INSIGHTS_LINK, browser)
-    events_insights.set_date_range_filter('Events', 'Start Date Date', datetime(2018, 7, 1).date(),
-                                          datetime(2019, 7, 1).date())
+    events_insights.set_date_range_filter('Events', 'Start Date Date', datetime(2019, 7, 1).date(),
+                                          datetime(2020, 7, 1).date())
     events = events_insights.get_data()
 
     appts_insights = InsightsPage(APPTS_INSIGHTS_LINK, browser)
