@@ -1,20 +1,10 @@
 import json
 import os
 from csv import DictWriter
+from datetime import datetime
 from typing import List
 
 from autohandshake import HandshakeSession
-
-
-class BrowsingSession(HandshakeSession):
-    """
-    A wrapper class around HandshakeSession that always logs into the account
-    specified in the config file.
-    """
-
-    def __init__(self, max_wait_time=300):
-        config = load_config()
-        super().__init__(config['handshake_url'], config['handshake_email'], max_wait_time=max_wait_time)
 
 
 def load_config():
@@ -25,6 +15,19 @@ def load_config():
     config_file_path = f'{os.environ.get("USERPROFILE")}\\.handshake_administrator\\config.json'
     with open(config_file_path, 'r') as file:
         return json.load(file)
+
+
+config = load_config()
+
+class BrowsingSession(HandshakeSession):
+    """
+    A wrapper class around HandshakeSession that always logs into the account
+    specified in the config file.
+    """
+
+    def __init__(self, max_wait_time=300):
+        super().__init__(config['handshake_url'], config['handshake_email'],
+                         download_dir=config['download_dir'], max_wait_time=max_wait_time)
 
 
 def to_csv(list_of_dicts: List[dict], file_path: str):
@@ -45,6 +48,38 @@ def to_csv(list_of_dicts: List[dict], file_path: str):
         dict_writer = DictWriter(output_file, keys, lineterminator='\n')
         dict_writer.writeheader()
         dict_writer.writerows(list_of_dicts)
+
+
+def create_filepath_in_download_dir(filename: str) -> str:
+    """
+    Given a filename, append it to the download dir to create a full file path
+
+    :param filename: the filename to concatenate with the download dir
+    :return: the full filepath
+    """
+    return os.path.join(config['download_dir'], filename)
+
+
+def get_datestamped_filename(filename: str) -> str:
+    """
+    Get a filename (minus extension) with the current datetime stamp appended onto it
+
+    :param filename: the "base" name of the file, without any extensions
+    :type filename: str
+    :return: the base filename concatenated to the current datetime stamp
+    """
+    return f'{filename}_{format_datetime_for_filename(datetime.now())}'
+
+
+def format_datetime_for_filename(dt: datetime) -> str:
+    """
+    Format a datetime into a string suitable for use in a file name
+
+    :param dt: the datetime to format
+    :type dt: datetime
+    :return: a string representation of the datetime suitable for a file name
+    """
+    return dt.strftime('%Y-%m-%dT%H-%M-%S')
 
 
 def print_and_write_to_file(text: str, file_path):
