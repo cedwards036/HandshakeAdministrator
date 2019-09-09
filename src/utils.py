@@ -82,9 +82,8 @@ def format_datetime_for_filename(dt: datetime) -> str:
     return dt.strftime('%Y-%m-%dT%H-%M-%S')
 
 
-def print_and_write_to_file(text: str, file_path):
+def write_to_file(text: str, file_path):
     """Write the given string to a file at the given filepath"""
-    print(text)
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(text)
