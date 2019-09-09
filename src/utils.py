@@ -1,9 +1,9 @@
+import json
+import os
 from csv import DictWriter
 from typing import List
 
 from autohandshake import HandshakeSession
-
-from src.constants import HANDSHAKE_URL, HANDSHAKE_EMAIL
 
 
 class BrowsingSession(HandshakeSession):
@@ -13,7 +13,18 @@ class BrowsingSession(HandshakeSession):
     """
 
     def __init__(self, max_wait_time=300):
-        super().__init__(HANDSHAKE_URL, HANDSHAKE_EMAIL, max_wait_time=max_wait_time)
+        config = load_config()
+        super().__init__(config['handshake_url'], config['handshake_email'], max_wait_time=max_wait_time)
+
+
+def load_config():
+    """
+    Load the configuration file
+    :return: a dict of config values
+    """
+    config_file_path = f'{os.environ.get("USERPROFILE")}\\.handshake_administrator\\config.json'
+    with open(config_file_path, 'r') as file:
+        return json.load(file)
 
 
 def to_csv(list_of_dicts: List[dict], file_path: str):
