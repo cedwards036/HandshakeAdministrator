@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from csv import DictWriter
 from datetime import datetime
 from typing import List
@@ -25,9 +26,10 @@ class BrowsingSession(HandshakeSession):
     specified in the config file.
     """
 
-    def __init__(self, max_wait_time=300):
+    def __init__(self, password, max_wait_time=300):
         super().__init__(config['handshake_url'], config['handshake_email'],
-                         download_dir=config['download_dir'], max_wait_time=max_wait_time)
+                         password=password, download_dir=config['download_dir'],
+                         max_wait_time=max_wait_time, chromedriver_path=_get_chromedriver_path())
 
 
 def to_csv(list_of_dicts: List[dict], file_path: str):
@@ -124,3 +126,12 @@ def _create_or_statement_from(items):
     result += '", "'.join(items[:-1])
     result += f'", or "{items[-1]}"'
     return result
+
+
+def _get_chromedriver_path() -> str:
+    if getattr(sys, 'frozen', False):
+        # executed as a bundled exe, the driver is in the extracted folder
+        return os.path.join(sys._MEIPASS, "src", "chromedriver.exe")
+    else:
+        # executed as a simple script, the driver should be in `PATH`
+        return "./chromedriver.exe"
