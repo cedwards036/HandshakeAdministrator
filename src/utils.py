@@ -89,7 +89,6 @@ def write_to_file(text: str, file_path):
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(text)
-        print(f'Report successfully written to file at {file_path}')
     except FileNotFoundError as e:
         print(f'Unable to write results to file. {str(e)}')
 
