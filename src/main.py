@@ -2,13 +2,16 @@ import sys
 from getpass import getpass
 from typing import List
 
+from autohandshake.src.exceptions import (NoSuchElementError, InsufficientPermissionsError, InvalidPasswordError,
+                                          BrowserTimeoutError, InvalidUserTypeError, InvalidEmailError)
+
 from src.data_download_functions import (download_appointment_type_settings,
                                          download_label_settings_data,
                                          download_major_mapping,
                                          download_pending_student_requests,
                                          download_rejected_student_requests)
 from src.rule_sets.daily_verification import daily_verification
-from src.utils import BrowsingSession
+from src.utils import BrowsingSession, open_config_for_editing
 
 
 def get_user_selection(actions: List[dict]) -> int:
@@ -22,6 +25,7 @@ def get_user_selection(actions: List[dict]) -> int:
     except ValueError:
         print('Invalid selection. Please try again.\n')
         return get_user_selection(actions)
+
 
 def print_action_options(actions):
     for i, action in enumerate(actions):
@@ -43,13 +47,17 @@ def print_goodbye_message():
     print('Goodbye!')
 
 
+def open_config_file(*args):
+    open_config_for_editing()
+    print('Any changes to the config file will take effect the next time you launch the program.')
+
+
 def exit_program(*args):
     print_goodbye_message()
     sys.exit(0)
 
 
 if __name__ == '__main__':
-
     actions = [
         {'name': 'Run Daily Rule Verification', 'function': daily_verification},
         {'name': 'Download Appointment Type Settings', 'function': download_appointment_type_settings},
@@ -57,6 +65,7 @@ if __name__ == '__main__':
         {'name': 'Download Major Mapping', 'function': download_major_mapping},
         {'name': 'Download Pending Student Requests', 'function': download_pending_student_requests},
         {'name': 'Download Rejected Student Requests', 'function': download_rejected_student_requests},
+        {'name': 'Open Config File', 'function': open_config_file},
         {'name': 'Exit Program', 'function': exit_program}
     ]
 
@@ -75,7 +84,8 @@ if __name__ == '__main__':
                 except SystemExit:
                     do_not_restart_browser = False
                     program_is_running = False
-                except:
+                except (NoSuchElementError, InsufficientPermissionsError, InvalidPasswordError, BrowserTimeoutError,
+                        InvalidUserTypeError, InvalidEmailError) as e:
                     user_wants_to_try_again = input(
                         'The program encountered an error. Would you like to try again? (y / n): ').lower() == 'y'
                     if not user_wants_to_try_again:

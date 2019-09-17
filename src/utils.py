@@ -1,11 +1,31 @@
 import json
 import os
+import subprocess
 import sys
 from csv import DictWriter
 from datetime import datetime
+from getpass import getuser
 from typing import List
 
 from autohandshake import HandshakeSession
+
+CONFIG_DIR = f'{os.environ.get("USERPROFILE")}\\.handshake_administrator'
+CONFIG_FILE_NAME = 'config.json'
+CONFIG_FILEPATH = f'{CONFIG_DIR}\\{CONFIG_FILE_NAME}'
+
+
+def _create_default_config():
+    username = getuser()
+    config = {
+        "handshake_url": "https://jhu.joinhandshake.com",
+        "handshake_email": f"{username}@jhu.edu",
+        "download_dir": f"C:\\Users\\{username}\\Downloads"
+    }
+    if not (os.path.exists(CONFIG_DIR) and os.path.isdir(CONFIG_DIR)):
+        os.mkdir(CONFIG_DIR)
+    if not (os.path.exists(CONFIG_FILEPATH) and os.path.isfile(CONFIG_FILEPATH)):
+        with open(CONFIG_FILEPATH, 'w') as file:
+            json.dump(config, file)
 
 
 def load_config():
@@ -13,9 +33,16 @@ def load_config():
     Load the configuration file
     :return: a dict of config values
     """
-    config_file_path = f'{os.environ.get("USERPROFILE")}\\.handshake_administrator\\config.json'
-    with open(config_file_path, 'r') as file:
+    _create_default_config()
+    with open(CONFIG_FILEPATH, 'r') as file:
         return json.load(file)
+
+
+def open_config_for_editing():
+    """
+    Open the config file in the default text editor for manual editing.
+    """
+    subprocess.run(['start', CONFIG_FILEPATH], check=True, shell=True)
 
 
 config = load_config()
