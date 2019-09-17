@@ -48,8 +48,8 @@ def print_goodbye_message():
 
 
 def open_config_file(*args):
-    open_config_for_editing()
     print('Any changes to the config file will take effect the next time you launch the program.')
+    return open_config_for_editing()
 
 
 def exit_program(*args):

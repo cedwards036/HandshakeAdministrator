@@ -43,6 +43,7 @@ def open_config_for_editing():
     Open the config file in the default text editor for manual editing.
     """
     subprocess.run(['start', CONFIG_FILEPATH], check=True, shell=True)
+    return CONFIG_FILEPATH
 
 
 config = load_config()
