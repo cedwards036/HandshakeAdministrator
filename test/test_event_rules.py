@@ -4,7 +4,8 @@ from src.constants import CareerCenters
 from src.rule_verification import VerificationResult
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
-    events_are_invite_only_iff_not_university_wide
+    events_are_invite_only_iff_not_university_wide,
+    advertisement_events_are_labeled
 )
 
 
@@ -410,3 +411,75 @@ class TestEventsAreInviteOnly(unittest.TestCase):
             'Event 2635346 (CANCELLED: SAIS DC: SAISLeads Retreat) should be invite-only']
         self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
                          events_are_invite_only_iff_not_university_wide(event_data))
+
+
+class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
+    RULE_NAME = '"Advertisement" events are labeled properly and have event type "Other"'
+
+    def test_rule_flags_homewood_office_hours_events(self):
+        event_data = [
+            {
+                'events.id': "288569",
+                'events.name': "Homewood: WSE Office Hours",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Other',
+                'added_institution_labels_on_events.name_list': ''
+            },
+            {
+                'events.id': "331585",
+                'events.name': "Homewood: office hours with Tessa",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Other',
+                'added_institution_labels_on_events.name_list': 'hwd: stem'
+            },
+            {
+                'events.id': "333931",
+                'events.name': "Homewood: Job Negotiation Workshop",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Workshop',
+                'added_institution_labels_on_events.name_list': ''
+            },
+        ]
+        expected_errors = [
+            'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement"',
+            'Event 331585 (Homewood: office hours with Tessa) should be labeled "shared: advertisement"'
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
+                         advertisement_events_are_labeled(event_data))
+
+    def test_with_multiple_labels(self):
+        event_data = [
+            {
+                'events.id': "331585",
+                'events.name': "Homewood: office Hours with Tessa",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Other',
+                'added_institution_labels_on_events.name_list': 'hwd: stem, shared: advertisement, hwd: virtual'
+            }
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, True),
+                         advertisement_events_are_labeled(event_data))
+
+    def test_rule_flags_events_with_wrong_event_type(self):
+        event_data = [
+            {
+                'events.id': "288569",
+                'events.name': "Homewood: WSE Office Hours",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Group Appointment',
+                'added_institution_labels_on_events.name_list': ''
+            },
+            {
+                'events.id': "331585",
+                'events.name': "Homewood: office hours with Tessa",
+                'career_center_on_events.name': CareerCenters.HOMEWOOD,
+                'event_type_on_events.name': 'Workshop',
+                'added_institution_labels_on_events.name_list': 'shared: advertisement'
+            },
+        ]
+        expected_errors = [
+            'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"',
+            'Event 331585 (Homewood: office hours with Tessa) should have event type "Other"'
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
+                         advertisement_events_are_labeled(event_data))

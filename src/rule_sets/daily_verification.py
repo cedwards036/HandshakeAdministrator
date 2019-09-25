@@ -9,13 +9,14 @@ from src.rules.appointment_rules import (
 )
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
-    events_are_invite_only_iff_not_university_wide
+    events_are_invite_only_iff_not_university_wide,
+    advertisement_events_are_labeled
 )
 from src.utils import (write_to_file, BrowsingSession, create_filepath_in_download_dir,
                        get_datestamped_filename, read_and_delete_json, config)
 from src.verification_report import run_rule_verifications, VerificationReport
 
-EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vZXZlbnRzP3FpZD00VW8yOTJMbFhLWEw4ZUs0SnZqSXdOJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
+EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vZXZlbnRzP3FpZD1welBrZWNVaUJzZTlnbkpRSHdvaTYwJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
 APPTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vYXBwb2ludG1lbnRzP3FpZD0xYTJpcktJSlFhR0loNTl5eVJHTkhnJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
 
 REPORT_FILEPATH = create_filepath_in_download_dir(f'{get_datestamped_filename("daily_rule_verification_results")}.txt')
@@ -27,6 +28,7 @@ def daily_verification(browser: HandshakeBrowser) -> str:
     run_rule_verifications([
         (jhu_owned_events_are_prefixed_correctly, events),
         (events_are_invite_only_iff_not_university_wide, events),
+        (advertisement_events_are_labeled, events),
         (all_appointments_have_a_type, appts),
         (past_appointments_have_finalized_status, appts)
     ], _handle_daily_rule_report)

@@ -54,7 +54,7 @@ class BrowsingSession(HandshakeSession):
     specified in the config file.
     """
 
-    def __init__(self, password, max_wait_time=300):
+    def __init__(self, password=None, max_wait_time=300):
         super().__init__(config['handshake_url'], config['handshake_email'],
                          password=password, download_dir=config['download_dir'],
                          max_wait_time=max_wait_time, chromedriver_path=_get_chromedriver_path())
