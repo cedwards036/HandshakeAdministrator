@@ -101,6 +101,12 @@ def _get_ad_error(event: dict):
     def _event_has_wrong_type(event: dict) -> bool:
         return event['event_type_on_events.name'] != 'Other'
 
+    def _event_is_homewood(event: dict) -> bool:
+        return event['career_center_on_events.name'] == 'Life Design Lab (Homewood)'
+
+    def _event_is_ad(event: dict) -> bool:
+        return _event_is_homewood(event) and _event_is_office_hours_ad(event)
+
     def _build_error_str(event: dict) -> str:
         base_error_str = f'Event {event["events.id"]} ({event["events.name"]}) should'
         label_error_substr = 'be labeled "shared: advertisement"'
@@ -112,7 +118,7 @@ def _get_ad_error(event: dict):
         else:
             return f'{base_error_str} {label_error_substr}'
 
-    if _event_is_office_hours_ad(event) and (not _event_has_ad_label(event) or _event_has_wrong_type(event)):
+    if _event_is_ad(event) and (not _event_has_ad_label(event) or _event_has_wrong_type(event)):
         return _build_error_str(event)
     else:
         return None

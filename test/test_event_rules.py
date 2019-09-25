@@ -483,3 +483,16 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
                          advertisement_events_are_labeled(event_data))
+
+    def test_doesnt_flag_non_homewood_office_hours(self):
+        event_data = [
+            {
+                'events.id': "331585",
+                'events.name': "PDCO: Office Hours",
+                'career_center_on_events.name': CareerCenters.PDCO,
+                'event_type_on_events.name': 'Workshop',
+                'added_institution_labels_on_events.name_list': ''
+            },
+        ]
+        self.assertEqual(VerificationResult(self.RULE_NAME, True),
+                         advertisement_events_are_labeled(event_data))
