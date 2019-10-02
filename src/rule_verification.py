@@ -13,6 +13,9 @@ class VerificationResult:
             'errors': errors
         }
 
+    def parse_errors(self, error_parser: callable) -> List[dict]:
+        return [error_parser(error) for error in self._data['errors']]
+
     @property
     def rule(self):
         return self._data['rule']

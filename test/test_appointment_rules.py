@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from src.rule_verification import VerificationResult
 from src.rules.appointment_rules import (
     past_appointments_have_finalized_status,
-    all_appointments_have_a_type
+    all_appointments_have_a_type,
+    parse_status_error_str
 )
 
 
@@ -172,6 +173,27 @@ class TestAppointmentHasType(unittest.TestCase):
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
                          all_appointments_have_a_type(appt_data))
+
+
+class TestErrorStringParser(unittest.TestCase):
+
+    def test_status_error_parser(self):
+        test_strs = [
+            'Appointment 4124582 (MaryAnn Riegelman, 2019-07-23 15:00:00) has status "approved"',
+            'Appointment 4167709 (Jenn Leard- Consulting, 2019-08-14 16:30:00) has status "started"',
+            'Appointment 4383184 (Roni White, 2019-09-19 14:00:00) has status "approved"'
+        ]
+
+        expected = [
+            {'id': '4124582', 'url': 'https://app.joinhandshake.com/appointments/4124582',
+             'staff_name': 'MaryAnn Riegelman', 'datetime': datetime(2019, 7, 23, 15), 'status': 'approved'},
+            {'id': '4167709', 'url': 'https://app.joinhandshake.com/appointments/4167709',
+             'staff_name': 'Jenn Leard- Consulting', 'datetime': datetime(2019, 8, 14, 16, 30), 'status': 'started'},
+            {'id': '4383184', 'url': 'https://app.joinhandshake.com/appointments/4383184', 'staff_name': 'Roni White',
+             'datetime': datetime(2019, 9, 19, 14), 'status': 'approved'}
+        ]
+        actual = [parse_status_error_str(error_str) for error_str in test_strs]
+        self.assertEqual(expected, actual)
 
 def format_datetime(date_time):
     return date_time.strftime('%Y-%m-%d %H:%M:%S')

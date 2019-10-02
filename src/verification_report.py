@@ -1,6 +1,7 @@
 from typing import List, Callable
 
 from src.rule_verification import VerificationResult
+from src.utils import to_csv
 
 
 class VerificationReport:
@@ -70,6 +71,23 @@ def run_rule_verifications(rules: List[tuple] = None, callback: Callable = print
     verification_results = _verify_rules(rules)
     report = VerificationReport(verification_results)
     callback(report)
+
+
+def create_error_csv(verification_func: callable, data: List[dict],
+                     error_parser: callable, filepath: str) -> str:
+    """
+    Given a rule to verify and some data to verify against, create a CSV file
+    detailing any rule-breaking records.
+
+    :param verification_func: the rule verification function
+    :param data: data to use in verifying the rule
+    :param filepath: the filepath where the CSV should be written
+    :return: the resulting filepath of the new CSV
+    """
+    verification_result = verification_func(data)
+    csv_data = verification_result.parse_errors(error_parser)
+    to_csv(csv_data, filepath)
+    return filepath
 
 
 def _verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
