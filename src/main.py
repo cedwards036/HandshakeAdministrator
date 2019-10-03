@@ -10,6 +10,7 @@ from src.data_download_functions import (download_appointment_type_settings,
                                          download_major_mapping,
                                          download_pending_student_requests,
                                          download_rejected_student_requests)
+from src.file_parsers import run_job_labels_report
 from src.rule_sets.daily_verification import daily_verification
 from src.utils import BrowsingSession, open_config_for_editing
 
@@ -65,6 +66,7 @@ if __name__ == '__main__':
         {'name': 'Download Major Mapping', 'function': download_major_mapping},
         {'name': 'Download Pending Student Requests', 'function': download_pending_student_requests},
         {'name': 'Download Rejected Student Requests', 'function': download_rejected_student_requests},
+        {'name': 'Run Jobs Labels Report', 'function': run_job_labels_report},
         {'name': 'Open Config File', 'function': open_config_file},
         {'name': 'Exit Program', 'function': exit_program}
     ]
