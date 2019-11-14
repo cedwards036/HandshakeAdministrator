@@ -1,6 +1,7 @@
 from typing import List
 
 from src.constants import CareerCenters
+from src.insights_fields import EventFields
 from src.rule_verification import make_rule
 from src.utils import create_or_list_from
 
@@ -49,40 +50,40 @@ def _get_event_prefix_error(event: dict):
         return [f'{CANCELLED_PREFIX} {prefix}' for prefix in prefixes]
 
     def _build_event_prefix_error_str(event: dict, valid_prefixes: List[str]) -> str:
-        return (f'Event {event["events.id"]} ({event["events.name"]}) should have '
+        return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should have '
                 f'prefix {create_or_list_from(valid_prefixes)}')
 
-    if not event['career_center_on_events.name']:
+    if not event[EventFields.CAREER_CENTER]:
         return None
     else:
-        cleaned_event_name = _get_cleaned_event_name(event['events.name'])
+        cleaned_event_name = _get_cleaned_event_name(event[EventFields.NAME])
         if _event_is_university_wide(cleaned_event_name) or _event_is_a_test_event(cleaned_event_name):
             return None
         else:
-            valid_prefixes = CAREER_CENTER_PREFIXES[event['career_center_on_events.name']]
+            valid_prefixes = CAREER_CENTER_PREFIXES[event[EventFields.CAREER_CENTER]]
             for prefix in valid_prefixes:
                 if cleaned_event_name.startswith(prefix):
                     return None
-            if _event_was_intended_to_be_cancelled(event['events.name']):
+            if _event_was_intended_to_be_cancelled(event[EventFields.NAME]):
                 valid_prefixes = _add_cancelled_to_prefixes(valid_prefixes)
             return _build_event_prefix_error_str(event, valid_prefixes)
 
 
 def _get_invite_error(event: dict):
     def _event_is_invite_only(event: dict) -> bool:
-        return event['events.invite_only'] == 'Yes'
+        return event[EventFields.IS_INVITE_ONLY] == 'Yes'
 
     def _build_invite_only_error_string(event: dict, should_be_invite_only: bool) -> str:
         if should_be_invite_only:
             imperative = 'should'
         else:
             imperative = 'should not'
-        return (f'Event {event["events.id"]} ({event["events.name"]}) {imperative} be invite-only')
+        return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) {imperative} be invite-only')
 
-    if not event['career_center_on_events.name']:
+    if not event[EventFields.CAREER_CENTER]:
         return None
     else:
-        cleaned_event_name = _get_cleaned_event_name(event['events.name'])
+        cleaned_event_name = _get_cleaned_event_name(event[EventFields.NAME])
         if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
             return _build_invite_only_error_string(event, should_be_invite_only=False)
         elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
@@ -93,22 +94,22 @@ def _get_invite_error(event: dict):
 
 def _get_ad_error(event: dict):
     def _event_is_office_hours_ad(event: dict) -> bool:
-        return 'office hours' in event["events.name"].lower()
+        return 'office hours' in event[EventFields.NAME].lower()
 
     def _event_has_ad_label(event: dict) -> bool:
-        return 'shared: advertisement' in event['added_institution_labels_on_events.name_list']
+        return 'shared: advertisement' in event[EventFields.LABELS_LIST]
 
     def _event_has_wrong_type(event: dict) -> bool:
-        return event['event_type_on_events.name'] != 'Other'
+        return event[EventFields.EVENT_TYPE] != 'Other'
 
     def _event_is_homewood(event: dict) -> bool:
-        return event['career_center_on_events.name'] == 'Life Design Lab (Homewood)'
+        return event[EventFields.CAREER_CENTER] == 'Life Design Lab (Homewood)'
 
     def _event_is_ad(event: dict) -> bool:
         return _event_is_homewood(event) and _event_is_office_hours_ad(event)
 
     def _build_error_str(event: dict) -> str:
-        base_error_str = f'Event {event["events.id"]} ({event["events.name"]}) should'
+        base_error_str = f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should'
         label_error_substr = 'be labeled "shared: advertisement"'
         type_error_substr = 'have event type "Other"'
         if (not _event_has_ad_label(event)) and _event_has_wrong_type(event):

@@ -3,7 +3,7 @@ class CareerCenters:
     CAREY = 'Carey Business School Career Development Office'
     SAIS = 'SAIS Global Careers'
     PDCO = 'Professional Development and Career Office (SOM, SON, BSPH)'
-    NURSING = 'School of Nursing Career Services'
+    NURSING = 'School of Nursing Career Lab'
     BSPH = 'Bloomberg School of Public Health Career Services Office'
     PEABODY = 'Peabody Career Services (LAUNCHPad)'
     AAP = 'AAP Career Services (KSAS)'

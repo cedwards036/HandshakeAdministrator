@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime, timedelta
 
+from src.insights_fields import AppointmentFields
 from src.rule_verification import VerificationResult
 from src.rules.appointment_rules import (
     past_appointments_have_finalized_status,
@@ -23,20 +24,20 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
         next_month_end_time = next_month_start_time + timedelta(minutes=30)
         appt_data = [
             {
-                "appointments.id": "6352432",
-                "appointments.start_date_time": format_datetime(tomorrow_start_time),
-                "appointments.end_date_time": format_datetime(tomorrow_end_time),
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Alex",
-                "staff_member_on_appointments.last_name": "Vanderbildt"
+                AppointmentFields.ID: "6352432",
+                AppointmentFields.START_DATE_TIME: format_datetime(tomorrow_start_time),
+                AppointmentFields.END_DATE_TIME: format_datetime(tomorrow_end_time),
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": format_datetime(next_month_start_time),
-                "appointments.end_date_time": format_datetime(next_month_end_time),
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Mary",
-                "staff_member_on_appointments.last_name": "Smith"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: format_datetime(next_month_start_time),
+                AppointmentFields.END_DATE_TIME: format_datetime(next_month_end_time),
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Mary",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith"
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -45,36 +46,36 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
     def test_completed_past_appointments_are_fine(self):
         appt_data = [
             {
-                "appointments.id": "6352432",
-                "appointments.start_date_time": "2018-05-28 15:30:00",
-                "appointments.end_date_time": "2018-05-28 16:00:00",
-                "appointments.status": "completed",
-                "staff_member_on_appointments.first_name": "Alex",
-                "staff_member_on_appointments.last_name": "Vanderbildt"
+                AppointmentFields.ID: "6352432",
+                AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+                AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+                AppointmentFields.STATUS: "completed",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2015-12-08 10:00:00",
-                "appointments.end_date_time": "2015-12-08 10:30:00",
-                "appointments.status": "cancelled",
-                "staff_member_on_appointments.first_name": "Mary",
-                "staff_member_on_appointments.last_name": "Smith"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2015-12-08 10:00:00",
+                AppointmentFields.END_DATE_TIME: "2015-12-08 10:30:00",
+                AppointmentFields.STATUS: "cancelled",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Mary",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2008-02-08 10:00:00",
-                "appointments.end_date_time": "2008-02-08 10:30:00",
-                "appointments.status": "no_show",
-                "staff_member_on_appointments.first_name": "Jack",
-                "staff_member_on_appointments.last_name": "Heizer"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2008-02-08 10:00:00",
+                AppointmentFields.END_DATE_TIME: "2008-02-08 10:30:00",
+                AppointmentFields.STATUS: "no_show",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Jack",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Heizer"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2017-12-08 11:00:00",
-                "appointments.end_date_time": "2017-12-01 11:30:00",
-                "appointments.status": "declined",
-                "staff_member_on_appointments.first_name": "Ella",
-                "staff_member_on_appointments.last_name": "Barns"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2017-12-08 11:00:00",
+                AppointmentFields.END_DATE_TIME: "2017-12-01 11:30:00",
+                AppointmentFields.STATUS: "declined",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Ella",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Barns"
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -83,28 +84,28 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
     def test_incomplete_past_appointments(self):
         appt_data = [
             {
-                "appointments.id": "6352432",
-                "appointments.start_date_time": "2018-05-28 15:30:00",
-                "appointments.end_date_time": "2018-05-28 16:00:00",
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Alex",
-                "staff_member_on_appointments.last_name": "Vanderbildt"
+                AppointmentFields.ID: "6352432",
+                AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+                AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt"
             },
             {
-                "appointments.id": "290392059",
-                "appointments.start_date_time": "2015-12-08 10:00:00",
-                "appointments.end_date_time": "2015-12-08 10:30:00",
-                "appointments.status": "started",
-                "staff_member_on_appointments.first_name": "Mary",
-                "staff_member_on_appointments.last_name": "Smith"
+                AppointmentFields.ID: "290392059",
+                AppointmentFields.START_DATE_TIME: "2015-12-08 10:00:00",
+                AppointmentFields.END_DATE_TIME: "2015-12-08 10:30:00",
+                AppointmentFields.STATUS: "started",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Mary",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2016-08-19 13:00:00",
-                "appointments.end_date_time": "2016-08-19 13:30:00",
-                "appointments.status": "completed",
-                "staff_member_on_appointments.first_name": "Jess",
-                "staff_member_on_appointments.last_name": "Walker"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2016-08-19 13:00:00",
+                AppointmentFields.END_DATE_TIME: "2016-08-19 13:30:00",
+                AppointmentFields.STATUS: "completed",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Jess",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Walker"
             },
         ]
         expected_errors = [
@@ -125,22 +126,22 @@ class TestAppointmentHasType(unittest.TestCase):
     def test_appointments_with_a_type_are_fine(self):
         appt_data = [
             {
-                "appointments.id": "6352432",
-                "appointments.start_date_time": "2018-05-28 15:30:00",
-                "appointments.end_date_time": "2018-05-28 16:00:00",
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Alex",
-                "staff_member_on_appointments.last_name": "Vanderbildt",
-                "appointment_type_on_appointments.name": "Resume Review Type"
+                AppointmentFields.ID: "6352432",
+                AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+                AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt",
+                AppointmentFields.TYPE: "Resume Review Type"
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2016-08-19 13:00:00",
-                "appointments.end_date_time": "2016-08-19 13:30:00",
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Mary",
-                "staff_member_on_appointments.last_name": "Smith",
-                "appointment_type_on_appointments.name": "Interview Prep Type"
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2016-08-19 13:00:00",
+                AppointmentFields.END_DATE_TIME: "2016-08-19 13:30:00",
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Mary",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith",
+                AppointmentFields.TYPE: "Interview Prep Type"
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -149,22 +150,22 @@ class TestAppointmentHasType(unittest.TestCase):
     def test_appointments_without_a_type(self):
         appt_data = [
             {
-                "appointments.id": "6352432",
-                "appointments.start_date_time": "2018-05-28 15:30:00",
-                "appointments.end_date_time": "2018-05-28 16:00:00",
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Alex",
-                "staff_member_on_appointments.last_name": "Vanderbildt",
-                "appointment_type_on_appointments.name": ""
+                AppointmentFields.ID: "6352432",
+                AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+                AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt",
+                AppointmentFields.TYPE: ""
             },
             {
-                "appointments.id": "18536335",
-                "appointments.start_date_time": "2016-08-19 13:00:00",
-                "appointments.end_date_time": "2016-08-19 13:30:00",
-                "appointments.status": "approved",
-                "staff_member_on_appointments.first_name": "Mary",
-                "staff_member_on_appointments.last_name": "Smith",
-                "appointment_type_on_appointments.name": None
+                AppointmentFields.ID: "18536335",
+                AppointmentFields.START_DATE_TIME: "2016-08-19 13:00:00",
+                AppointmentFields.END_DATE_TIME: "2016-08-19 13:30:00",
+                AppointmentFields.STATUS: "approved",
+                AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Mary",
+                AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith",
+                AppointmentFields.TYPE: None
             },
         ]
         expected_errors = [

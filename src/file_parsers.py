@@ -35,12 +35,13 @@ def parse_job_file(filepath: str) -> List[dict]:
     result = []
     with open(filepath, encoding='utf-8') as file:
         reader = csv.DictReader(file, delimiter=',', quotechar='"')
+        reader.fieldnames = [field.strip() for field in reader.fieldnames]
         for row in reader:
-            if row[LABELS_COL_NAME] != '':
+            if row[LABELS_COL_NAME].strip() != '':
                 result.append({
                     'job_id': row[ID_COL_NAME],
                     'job_url': f'https://jhu.joinhandshake.com/jobs/{row[ID_COL_NAME]}',
-                    'qualification_labels': row[LABELS_COL_NAME].split(', ')
+                    'qualification_labels': [label.strip() for label in row[LABELS_COL_NAME].split(', ')]
                 })
     return result
 

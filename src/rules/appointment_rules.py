@@ -1,27 +1,28 @@
 import re
 from datetime import datetime
 
+from src.insights_fields import AppointmentFields
 from src.rule_verification import make_rule
 
 
 def _get_appt_status_error(appt: dict):
     def _build_appt_status_error_string(appt: dict) -> str:
-        return (f'Appointment {appt["appointments.id"]} ({_get_staff_name(appt)}, '
-                f'{appt["appointments.start_date_time"]}) has status '
-                f'"{appt["appointments.status"]}"')
+        return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
+                f'{appt[AppointmentFields.START_DATE_TIME]}) has status '
+                f'"{appt[AppointmentFields.STATUS]}"')
 
     incomplete_statuses = ['approved', 'requested', 'started']
-    start_time = datetime.strptime(appt['appointments.start_date_time'], '%Y-%m-%d %H:%M:%S')
-    if appt['appointments.status'] in incomplete_statuses and start_time < datetime.now():
+    start_time = datetime.strptime(appt[AppointmentFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S')
+    if appt[AppointmentFields.STATUS] in incomplete_statuses and start_time < datetime.now():
         return _build_appt_status_error_string(appt)
     else:
         return None
 
 
 def _get_appt_type_missing_error(appt: dict) -> str:
-    if not appt['appointment_type_on_appointments.name']:
-        return (f'Appointment {appt["appointments.id"]} ({_get_staff_name(appt)}, '
-                f'{appt["appointments.start_date_time"]}) does not have an appointment type')
+    if not appt[AppointmentFields.TYPE]:
+        return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
+                f'{appt[AppointmentFields.START_DATE_TIME]}) does not have an appointment type')
 
 
 ##########################
@@ -57,8 +58,8 @@ def parse_status_error_str(status_error_str: str) -> dict:
 
 
 def _get_staff_name(appt: dict) -> str:
-    return (appt['staff_member_on_appointments.first_name'].strip() + ' ' +
-            appt['staff_member_on_appointments.last_name'].strip())
+    return (appt[AppointmentFields.STAFF_MEMBER_FIRST_NAME].strip() + ' ' +
+            appt[AppointmentFields.STAFF_MEMBER_LAST_NAME].strip())
 
 
 ######################

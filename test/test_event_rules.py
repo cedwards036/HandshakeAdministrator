@@ -1,6 +1,7 @@
 import unittest
 
 from src.constants import CareerCenters
+from src.insights_fields import EventFields
 from src.rule_verification import VerificationResult
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
@@ -19,9 +20,9 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_with_non_career_center_event(self):
         event_data = [
             {
-                'events.id': "4324725",
-                'events.name': "McKinsey Virtual Session",
-                'career_center_on_events.name': None
+                EventFields.ID: "4324725",
+                EventFields.NAME: "McKinsey Virtual Session",
+                EventFields.CAREER_CENTER: None
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -30,19 +31,19 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_university_wide_is_valid(self):
         event_data = [
             {
-                'events.id': "353242",
-                'events.name': "University-Wide: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "353242",
+                EventFields.NAME: "University-Wide: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "8563254",
-                'events.name': "University-Wide: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY
+                EventFields.ID: "8563254",
+                EventFields.NAME: "University-Wide: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY
             },
             {
-                'events.id': "902820",
-                'events.name': "University-Wide: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "902820",
+                EventFields.NAME: "University-Wide: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -51,19 +52,19 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_test_prefix_is_valid(self):
         event_data = [
             {
-                'events.id': "3463254",
-                'events.name': "Test: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "3463254",
+                EventFields.NAME: "Test: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "5364354",
-                'events.name': "test- Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "5364354",
+                EventFields.NAME: "test- Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': "26895576",
-                'events.name': "TESTING Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "26895576",
+                EventFields.NAME: "TESTING Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
         ]
         expected_errors = [
@@ -76,24 +77,24 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_cancelled_prefix_is_valid(self):
         event_data = [
             {
-                'events.id': "353242",
-                'events.name': "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "353242",
+                EventFields.NAME: "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "8563254",
-                'events.name': "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY
+                EventFields.ID: "8563254",
+                EventFields.NAME: "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY
             },
             {
-                'events.id': "902820",
-                'events.name': "CANCELLED: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "902820",
+                EventFields.NAME: "CANCELLED: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': "2635346",
-                'events.name': "CANCELLED: SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "2635346",
+                EventFields.NAME: "CANCELLED: SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
         ]
         expected_errors = [
@@ -106,19 +107,19 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_canceled_misspelling_gives_helpful_feedback(self):
         event_data = [
             {
-                'events.id': "902820",
-                'events.name': "CANCELED: PDCO: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "902820",
+                EventFields.NAME: "CANCELED: PDCO: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': "2635346",
-                'events.name': "CAnCELEd: SAIS: SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "2635346",
+                EventFields.NAME: "CAnCELEd: SAIS: SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': "3263343",
-                'events.name': "Cancelled: Peabody: Launch Event",
-                'career_center_on_events.name': CareerCenters.PEABODY
+                EventFields.ID: "3263343",
+                EventFields.NAME: "Cancelled: Peabody: Launch Event",
+                EventFields.CAREER_CENTER: CareerCenters.PEABODY
             }
         ]
         expected_errors = [
@@ -132,44 +133,44 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_with_one_of_each_bad_event(self):
         event_data = [
             {
-                'events.id': "353242",
-                'events.name': "Homewoo: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "353242",
+                EventFields.NAME: "Homewoo: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "8563254",
-                'events.name': "Cary: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY
+                EventFields.ID: "8563254",
+                EventFields.NAME: "Cary: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY
             },
             {
-                'events.id': "902820",
-                'events.name': "Univ. Wide: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "902820",
+                EventFields.NAME: "Univ. Wide: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': "2635346",
-                'events.name': "SAIS Europe SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "2635346",
+                EventFields.NAME: "SAIS Europe SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': '526433',
-                'events.name': 'N: How to Find Your First Nursing Job',
-                'career_center_on_events.name': CareerCenters.NURSING
+                EventFields.ID: '526433',
+                EventFields.NAME: 'N: How to Find Your First Nursing Job',
+                EventFields.CAREER_CENTER: CareerCenters.NURSING
             },
             {
-                'events.id': '328092',
-                'events.name': 'Strategies for Effective Professional Communication webinar',
-                'career_center_on_events.name': CareerCenters.AAP
+                EventFields.ID: '328092',
+                EventFields.NAME: 'Strategies for Effective Professional Communication webinar',
+                EventFields.CAREER_CENTER: CareerCenters.AAP
             },
             {
-                'events.id': '940935',
-                'events.name': 'Homewood: LAUNCH @ Lunch',
-                'career_center_on_events.name': CareerCenters.PEABODY
+                EventFields.ID: '940935',
+                EventFields.NAME: 'Homewood: LAUNCH @ Lunch',
+                EventFields.CAREER_CENTER: CareerCenters.PEABODY
             },
             {
-                'events.id': '5839252',
-                'events.name': 'BSP: Student Activities Fair',
-                'career_center_on_events.name': CareerCenters.BSPH
+                EventFields.ID: '5839252',
+                EventFields.NAME: 'BSP: Student Activities Fair',
+                EventFields.CAREER_CENTER: CareerCenters.BSPH
             }
         ]
         expected_errors = [
@@ -188,59 +189,59 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_with_one_of_each_correct_event(self):
         event_data = [
             {
-                'events.id': "288569",
-                'events.name': "Homewood: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "288569",
+                EventFields.NAME: "Homewood: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "331585",
-                'events.name': "Carey: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY
+                EventFields.ID: "331585",
+                EventFields.NAME: "Carey: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY
             },
             {
-                'events.id': "333931",
-                'events.name': "PDCO: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "333931",
+                EventFields.NAME: "PDCO: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': "2938025",
-                'events.name': "SAIS: Online Webinar",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "2938025",
+                EventFields.NAME: "SAIS: Online Webinar",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': "317809",
-                'events.name': "SAIS DC: SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "317809",
+                EventFields.NAME: "SAIS DC: SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': "288213",
-                'events.name': "SAIS Europe: SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: "288213",
+                EventFields.NAME: "SAIS Europe: SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': '239094',
-                'events.name': 'HNC: Group Coaching Appointment 3',
-                'career_center_on_events.name': CareerCenters.SAIS
+                EventFields.ID: '239094',
+                EventFields.NAME: 'HNC: Group Coaching Appointment 3',
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
-                'events.id': '249995',
-                'events.name': 'Nursing: How to Find Your First Nursing Job',
-                'career_center_on_events.name': CareerCenters.NURSING
+                EventFields.ID: '249995',
+                EventFields.NAME: 'Nursing: How to Find Your First Nursing Job',
+                EventFields.CAREER_CENTER: CareerCenters.NURSING
             },
             {
-                'events.id': '217543',
-                'events.name': 'AAP: Strategies for Effective Professional Communication webinar',
-                'career_center_on_events.name': CareerCenters.AAP
+                EventFields.ID: '217543',
+                EventFields.NAME: 'AAP: Strategies for Effective Professional Communication webinar',
+                EventFields.CAREER_CENTER: CareerCenters.AAP
             },
             {
-                'events.id': '264029',
-                'events.name': 'Peabody: LAUNCH @ Lunch',
-                'career_center_on_events.name': CareerCenters.PEABODY
+                EventFields.ID: '264029',
+                EventFields.NAME: 'Peabody: LAUNCH @ Lunch',
+                EventFields.CAREER_CENTER: CareerCenters.PEABODY
             },
             {
-                'events.id': '198116',
-                'events.name': 'BSPH: Student Activities Fair',
-                'career_center_on_events.name': CareerCenters.BSPH
+                EventFields.ID: '198116',
+                EventFields.NAME: 'BSPH: Student Activities Fair',
+                EventFields.CAREER_CENTER: CareerCenters.BSPH
             }
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -249,49 +250,49 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     def test_with_all_event_types(self):
         event_data = [
             {
-                'events.id': "288569",
-                'events.name': "Homewood: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD
+                EventFields.ID: "288569",
+                EventFields.NAME: "Homewood: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD
             },
             {
-                'events.id': "331585",
-                'events.name': "Carey: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY
+                EventFields.ID: "331585",
+                EventFields.NAME: "Carey: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY
             },
             {
-                'events.id': "333931",
-                'events.name': "PDCO: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO
+                EventFields.ID: "333931",
+                EventFields.NAME: "PDCO: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
             {
-                'events.id': '526433',
-                'events.name': 'N: How to Find Your First Nursing Job',
-                'career_center_on_events.name': CareerCenters.NURSING
+                EventFields.ID: '526433',
+                EventFields.NAME: 'N: How to Find Your First Nursing Job',
+                EventFields.CAREER_CENTER: CareerCenters.NURSING
             },
             {
-                'events.id': '328092',
-                'events.name': 'Strategies for Effective Professional Communication webinar',
-                'career_center_on_events.name': CareerCenters.AAP
+                EventFields.ID: '328092',
+                EventFields.NAME: 'Strategies for Effective Professional Communication webinar',
+                EventFields.CAREER_CENTER: CareerCenters.AAP
             },
             {
-                'events.id': '940935',
-                'events.name': 'Homewood: LAUNCH @ Lunch',
-                'career_center_on_events.name': CareerCenters.PEABODY
+                EventFields.ID: '940935',
+                EventFields.NAME: 'Homewood: LAUNCH @ Lunch',
+                EventFields.CAREER_CENTER: CareerCenters.PEABODY
             },
             {
-                'events.id': "83257925",
-                'events.name': "Deloitte Virtual Session",
-                'career_center_on_events.name': None
+                EventFields.ID: "83257925",
+                EventFields.NAME: "Deloitte Virtual Session",
+                EventFields.CAREER_CENTER: None
             },
             {
-                'events.id': "4324725",
-                'events.name': "McKinsey Virtual Session",
-                'career_center_on_events.name': None
+                EventFields.ID: "4324725",
+                EventFields.NAME: "McKinsey Virtual Session",
+                EventFields.CAREER_CENTER: None
             },
             {
-                'events.id': "12980293",
-                'events.name': "Google On-Site",
-                'career_center_on_events.name': None
+                EventFields.ID: "12980293",
+                EventFields.NAME: "Google On-Site",
+                EventFields.CAREER_CENTER: None
             },
         ]
         expected_errors = [
@@ -313,16 +314,16 @@ class TestEventsAreInviteOnly(unittest.TestCase):
     def test_non_career_center_events(self):
         event_data = [
             {
-                'events.id': "4324725",
-                'events.name': "McKinsey Virtual Session",
-                'career_center_on_events.name': None,
-                'events.invite_only': 'No'
+                EventFields.ID: "4324725",
+                EventFields.NAME: "McKinsey Virtual Session",
+                EventFields.CAREER_CENTER: None,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "4625224",
-                'events.name': "CIA Recruitment Event",
-                'career_center_on_events.name': None,
-                'events.invite_only': 'Yes'
+                EventFields.ID: "4625224",
+                EventFields.NAME: "CIA Recruitment Event",
+                EventFields.CAREER_CENTER: None,
+                EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -331,22 +332,22 @@ class TestEventsAreInviteOnly(unittest.TestCase):
     def test_university_wide_events(self):
         event_data = [
             {
-                'events.id': "6336475",
-                'events.name': "University-Wide: Consulting Alumni Panel",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'events.invite_only': 'No'
+                EventFields.ID: "6336475",
+                EventFields.NAME: "University-Wide: Consulting Alumni Panel",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "9892820",
-                'events.name': "University-Wide: Resume Workshop",
-                'career_center_on_events.name': CareerCenters.CAREY,
-                'events.invite_only': 'No'
+                EventFields.ID: "9892820",
+                EventFields.NAME: "University-Wide: Resume Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "8290282",
-                'events.name': "University-Wide: Resume Workshop",
-                'career_center_on_events.name': CareerCenters.PDCO,
-                'events.invite_only': 'Yes'
+                EventFields.ID: "8290282",
+                EventFields.NAME: "University-Wide: Resume Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO,
+                EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
         expected_errors = ['Event 8290282 (University-Wide: Resume Workshop) should not be invite-only']
@@ -356,22 +357,22 @@ class TestEventsAreInviteOnly(unittest.TestCase):
     def test_career_center_events(self):
         event_data = [
             {
-                'events.id': "38305945",
-                'events.name': "Homewood: Consulting Alumni Panel",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'events.invite_only': 'No'
+                EventFields.ID: "38305945",
+                EventFields.NAME: "Homewood: Consulting Alumni Panel",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "150925098",
-                'events.name': "Carey: Resume Workshop",
-                'career_center_on_events.name': CareerCenters.CAREY,
-                'events.invite_only': 'No'
+                EventFields.ID: "150925098",
+                EventFields.NAME: "Carey: Resume Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "95739393",
-                'events.name': "PDCO: Resume Workshop",
-                'career_center_on_events.name': CareerCenters.PDCO,
-                'events.invite_only': 'Yes'
+                EventFields.ID: "95739393",
+                EventFields.NAME: "PDCO: Resume Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO,
+                EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
         expected_errors = ['Event 38305945 (Homewood: Consulting Alumni Panel) should be invite-only',
@@ -382,28 +383,28 @@ class TestEventsAreInviteOnly(unittest.TestCase):
     def test_cancelled_prefix_doesnt_interefere(self):
         event_data = [
             {
-                'events.id': "353242",
-                'events.name': "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'events.invite_only': 'Yes'
+                EventFields.ID: "353242",
+                EventFields.NAME: "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.IS_INVITE_ONLY: 'Yes'
             },
             {
-                'events.id': "8563254",
-                'events.name': "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
-                'career_center_on_events.name': CareerCenters.CAREY,
-                'events.invite_only': 'Yes'
+                EventFields.ID: "8563254",
+                EventFields.NAME: "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY,
+                EventFields.IS_INVITE_ONLY: 'Yes'
             },
             {
-                'events.id': "902820",
-                'events.name': "CANCELLED: University-Wide: Career Clinic: Job Negotiation",
-                'career_center_on_events.name': CareerCenters.PDCO,
-                'events.invite_only': 'No'
+                EventFields.ID: "902820",
+                EventFields.NAME: "CANCELLED: University-Wide: Career Clinic: Job Negotiation",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
             {
-                'events.id': "2635346",
-                'events.name': "CANCELLED: SAIS DC: SAISLeads Retreat",
-                'career_center_on_events.name': CareerCenters.SAIS,
-                'events.invite_only': 'No'
+                EventFields.ID: "2635346",
+                EventFields.NAME: "CANCELLED: SAIS DC: SAISLeads Retreat",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS,
+                EventFields.IS_INVITE_ONLY: 'No'
             },
         ]
         expected_errors = [
@@ -419,25 +420,25 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
     def test_rule_flags_homewood_office_hours_events(self):
         event_data = [
             {
-                'events.id': "288569",
-                'events.name': "Homewood: WSE Office Hours",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Other',
-                'added_institution_labels_on_events.name_list': ''
+                EventFields.ID: "288569",
+                EventFields.NAME: "Homewood: WSE Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Other',
+                EventFields.LABELS_LIST: ''
             },
             {
-                'events.id': "331585",
-                'events.name': "Homewood: office hours with Tessa",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Other',
-                'added_institution_labels_on_events.name_list': 'hwd: stem'
+                EventFields.ID: "331585",
+                EventFields.NAME: "Homewood: office hours with Tessa",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Other',
+                EventFields.LABELS_LIST: 'hwd: stem'
             },
             {
-                'events.id': "333931",
-                'events.name': "Homewood: Job Negotiation Workshop",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Workshop',
-                'added_institution_labels_on_events.name_list': ''
+                EventFields.ID: "333931",
+                EventFields.NAME: "Homewood: Job Negotiation Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Workshop',
+                EventFields.LABELS_LIST: ''
             },
         ]
         expected_errors = [
@@ -450,11 +451,11 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
     def test_with_multiple_labels(self):
         event_data = [
             {
-                'events.id': "331585",
-                'events.name': "Homewood: office Hours with Tessa",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Other',
-                'added_institution_labels_on_events.name_list': 'hwd: stem, shared: advertisement, hwd: virtual'
+                EventFields.ID: "331585",
+                EventFields.NAME: "Homewood: office Hours with Tessa",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Other',
+                EventFields.LABELS_LIST: 'hwd: stem, shared: advertisement, hwd: virtual'
             }
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
@@ -463,18 +464,18 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
     def test_rule_flags_events_with_wrong_event_type(self):
         event_data = [
             {
-                'events.id': "288569",
-                'events.name': "Homewood: WSE Office Hours",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Group Appointment',
-                'added_institution_labels_on_events.name_list': ''
+                EventFields.ID: "288569",
+                EventFields.NAME: "Homewood: WSE Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Group Appointment',
+                EventFields.LABELS_LIST: ''
             },
             {
-                'events.id': "331585",
-                'events.name': "Homewood: office hours with Tessa",
-                'career_center_on_events.name': CareerCenters.HOMEWOOD,
-                'event_type_on_events.name': 'Workshop',
-                'added_institution_labels_on_events.name_list': 'shared: advertisement'
+                EventFields.ID: "331585",
+                EventFields.NAME: "Homewood: office hours with Tessa",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Workshop',
+                EventFields.LABELS_LIST: 'shared: advertisement'
             },
         ]
         expected_errors = [
@@ -487,11 +488,11 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
     def test_doesnt_flag_non_homewood_office_hours(self):
         event_data = [
             {
-                'events.id': "331585",
-                'events.name': "PDCO: Office Hours",
-                'career_center_on_events.name': CareerCenters.PDCO,
-                'event_type_on_events.name': 'Workshop',
-                'added_institution_labels_on_events.name_list': ''
+                EventFields.ID: "331585",
+                EventFields.NAME: "PDCO: Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.PDCO,
+                EventFields.EVENT_TYPE: 'Workshop',
+                EventFields.LABELS_LIST: ''
             },
         ]
         self.assertEqual(VerificationResult(self.RULE_NAME, True),
