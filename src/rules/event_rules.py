@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from src.constants import CareerCenters
 from src.insights_fields import EventFields
@@ -29,7 +29,7 @@ TEST_PREFIX = 'Test:'
 # ERROR MESSAGE FUNCTIONS
 ##########################
 
-def _get_event_prefix_error(event: dict):
+def _get_event_prefix_error(event: dict) -> Union[str, None]:
     def _event_is_a_test_event(event_name: str) -> bool:
         return event_name.startswith(TEST_PREFIX)
 
@@ -49,6 +49,25 @@ def _get_event_prefix_error(event: dict):
     def _add_cancelled_to_prefixes(prefixes: List[str]) -> List[str]:
         return [f'{CANCELLED_PREFIX} {prefix}' for prefix in prefixes]
 
+    def _get_error_str(event: dict) -> Union[str, None]:
+        valid_prefixes = _determine_valid_prefixes_for_event(event)
+        if _event_has_valid_prefix(event, valid_prefixes):
+            return None
+        else:
+            return _build_event_prefix_error_str(event, valid_prefixes)
+
+    def _determine_valid_prefixes_for_event(event: dict) -> List[str]:
+        valid_prefixes = CAREER_CENTER_PREFIXES[event[EventFields.CAREER_CENTER]]
+        if _event_was_intended_to_be_cancelled(event[EventFields.NAME]):
+            valid_prefixes = _add_cancelled_to_prefixes(valid_prefixes)
+        return valid_prefixes
+
+    def _event_has_valid_prefix(event: dict, valid_prefixes: List[str]) -> bool:
+        for prefix in valid_prefixes:
+            if event[EventFields.NAME].startswith(prefix):
+                return True
+        return False
+
     def _build_event_prefix_error_str(event: dict, valid_prefixes: List[str]) -> str:
         return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should have '
                 f'prefix {create_or_list_from(valid_prefixes)}')
@@ -56,22 +75,25 @@ def _get_event_prefix_error(event: dict):
     if not event[EventFields.CAREER_CENTER]:
         return None
     else:
-        cleaned_event_name = _get_cleaned_event_name(event[EventFields.NAME])
+        cleaned_event_name = _strip_cancelled_prefix_from_event_name(event[EventFields.NAME])
         if _event_is_university_wide(cleaned_event_name) or _event_is_a_test_event(cleaned_event_name):
             return None
         else:
-            valid_prefixes = CAREER_CENTER_PREFIXES[event[EventFields.CAREER_CENTER]]
-            for prefix in valid_prefixes:
-                if cleaned_event_name.startswith(prefix):
-                    return None
-            if _event_was_intended_to_be_cancelled(event[EventFields.NAME]):
-                valid_prefixes = _add_cancelled_to_prefixes(valid_prefixes)
-            return _build_event_prefix_error_str(event, valid_prefixes)
+            return _get_error_str(event)
 
 
-def _get_invite_error(event: dict):
+def _get_invite_error(event: dict) -> Union[str, None]:
     def _event_is_invite_only(event: dict) -> bool:
         return event[EventFields.IS_INVITE_ONLY] == 'Yes'
+
+    def _get_error_str(event: dict) -> Union[str, None]:
+        cleaned_event_name = _strip_cancelled_prefix_from_event_name(event[EventFields.NAME])
+        if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
+            return _build_invite_only_error_string(event, should_be_invite_only=False)
+        elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
+            return _build_invite_only_error_string(event, should_be_invite_only=True)
+        else:
+            return None
 
     def _build_invite_only_error_string(event: dict, should_be_invite_only: bool) -> str:
         if should_be_invite_only:
@@ -83,16 +105,10 @@ def _get_invite_error(event: dict):
     if not event[EventFields.CAREER_CENTER]:
         return None
     else:
-        cleaned_event_name = _get_cleaned_event_name(event[EventFields.NAME])
-        if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
-            return _build_invite_only_error_string(event, should_be_invite_only=False)
-        elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
-            return _build_invite_only_error_string(event, should_be_invite_only=True)
-        else:
-            return None
+        return _get_error_str(event)
 
 
-def _get_ad_error(event: dict):
+def _get_ad_error(event: dict) -> Union[str, None]:
     def _event_is_office_hours_ad(event: dict) -> bool:
         return 'office hours' in event[EventFields.NAME].lower()
 
@@ -129,7 +145,7 @@ def _get_ad_error(event: dict):
 # GENERAL HELPER FUNCTIONS
 ###########################
 
-def _get_cleaned_event_name(event_name: str) -> str:
+def _strip_cancelled_prefix_from_event_name(event_name: str) -> str:
     if event_name.startswith(CANCELLED_PREFIX):
         return event_name[len(CANCELLED_PREFIX):].lstrip()
     else:
