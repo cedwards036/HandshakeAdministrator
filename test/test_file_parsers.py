@@ -1,6 +1,6 @@
 import unittest
 
-from src.file_parsers import parse_job_file
+from src.job_label_parser import parse_job_file
 
 
 class TestJobFileParser(unittest.TestCase):

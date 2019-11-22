@@ -10,7 +10,7 @@ from src.data_download_functions import (download_appointment_type_settings,
                                          download_major_mapping,
                                          download_pending_student_requests,
                                          download_rejected_student_requests)
-from src.file_parsers import run_job_labels_report
+from src.job_label_parser import run_job_labels_report
 from src.rule_sets.daily_verification import daily_verification
 from src.utils import BrowsingSession, open_config_for_editing
 
