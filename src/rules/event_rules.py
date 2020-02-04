@@ -9,17 +9,6 @@ from src.utils import create_or_list_from
 # CONSTANTS
 #############
 
-CAREER_CENTER_PREFIXES = {
-    CareerCenters.HOMEWOOD: ['Homewood:'],
-    CareerCenters.CAREY: ['Carey:'],
-    CareerCenters.SAIS: ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:'],
-    CareerCenters.PDCO: ['PDCO:'],
-    CareerCenters.NURSING: ['Nursing:'],
-    CareerCenters.BSPH: ['BSPH:'],
-    CareerCenters.PEABODY: ['Peabody:'],
-    CareerCenters.AAP: ['AAP:']
-}
-
 UNIVERSITY_WIDE_PREFIX = 'University-Wide:'
 CANCELLED_PREFIX = 'CANCELLED:'
 TEST_PREFIX = 'Test:'
@@ -29,7 +18,12 @@ TEST_PREFIX = 'Test:'
 # ERROR MESSAGE FUNCTIONS
 ##########################
 
-def _get_event_prefix_error(event: dict) -> Union[str, None]:
+def _build_event_prefix_error_message(event: dict, valid_prefixes: List[str]) -> str:
+    return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should have '
+            f'prefix {create_or_list_from(valid_prefixes)}')
+
+
+def _get_event_prefix_error(event: dict) -> Union[dict, None]:
     def _event_is_a_test_event(event_name: str) -> bool:
         return event_name.startswith(TEST_PREFIX)
 
@@ -49,28 +43,34 @@ def _get_event_prefix_error(event: dict) -> Union[str, None]:
     def _add_cancelled_to_prefixes(prefixes: List[str]) -> List[str]:
         return [f'{CANCELLED_PREFIX} {prefix}' for prefix in prefixes]
 
-    def _get_error_str(event: dict) -> Union[str, None]:
+    def _get_error_dict(event: dict) -> Union[dict, None]:
         valid_prefixes = _determine_valid_prefixes_for_event(event)
         if _event_has_valid_prefix(event, valid_prefixes):
             return None
         else:
-            return _build_event_prefix_error_str(event, valid_prefixes)
+            return {
+                'id': event[EventFields.ID],
+                'error_msg': _build_event_prefix_error_message(event, valid_prefixes)
+            }
 
     def _determine_valid_prefixes_for_event(event: dict) -> List[str]:
+        CAREER_CENTER_PREFIXES = {
+            CareerCenters.HOMEWOOD: ['Homewood:'],
+            CareerCenters.CAREY: ['Carey:'],
+            CareerCenters.SAIS: ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:'],
+            CareerCenters.PDCO: ['PDCO:'],
+            CareerCenters.NURSING: ['Nursing:'],
+            CareerCenters.BSPH: ['BSPH:'],
+            CareerCenters.PEABODY: ['Peabody:'],
+            CareerCenters.AAP: ['AAP:']
+        }
         valid_prefixes = CAREER_CENTER_PREFIXES[event[EventFields.CAREER_CENTER]]
         if _event_was_intended_to_be_cancelled(event[EventFields.NAME]):
             valid_prefixes = _add_cancelled_to_prefixes(valid_prefixes)
         return valid_prefixes
 
     def _event_has_valid_prefix(event: dict, valid_prefixes: List[str]) -> bool:
-        for prefix in valid_prefixes:
-            if event[EventFields.NAME].startswith(prefix):
-                return True
-        return False
-
-    def _build_event_prefix_error_str(event: dict, valid_prefixes: List[str]) -> str:
-        return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should have '
-                f'prefix {create_or_list_from(valid_prefixes)}')
+        return any(event[EventFields.NAME].startswith(prefix) for prefix in valid_prefixes)
 
     if not event[EventFields.CAREER_CENTER]:
         return None
@@ -79,44 +79,65 @@ def _get_event_prefix_error(event: dict) -> Union[str, None]:
         if _event_is_university_wide(cleaned_event_name) or _event_is_a_test_event(cleaned_event_name):
             return None
         else:
-            return _get_error_str(event)
+            return _get_error_dict(event)
 
 
-def _get_invite_error(event: dict) -> Union[str, None]:
+def _build_invite_only_error_message(event: dict, should_be_invite_only: bool) -> str:
+    if should_be_invite_only:
+        imperative = 'should'
+    else:
+        imperative = 'should not'
+    return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) {imperative} be invite-only')
+
+
+def _get_invite_error(event: dict) -> Union[dict, None]:
     def _event_is_invite_only(event: dict) -> bool:
         return event[EventFields.IS_INVITE_ONLY] == 'Yes'
 
-    def _get_error_str(event: dict) -> Union[str, None]:
+    def _get_error_dict(event: dict) -> Union[dict, None]:
         cleaned_event_name = _strip_cancelled_prefix_from_event_name(event[EventFields.NAME])
         if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
-            return _build_invite_only_error_string(event, should_be_invite_only=False)
+            return _build_invite_only_error_dict(event, should_be_invite_only=False)
         elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
-            return _build_invite_only_error_string(event, should_be_invite_only=True)
+            return _build_invite_only_error_dict(event, should_be_invite_only=True)
         else:
             return None
 
-    def _build_invite_only_error_string(event: dict, should_be_invite_only: bool) -> str:
-        if should_be_invite_only:
-            imperative = 'should'
-        else:
-            imperative = 'should not'
-        return (f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) {imperative} be invite-only')
+    def _build_invite_only_error_dict(event: dict, should_be_invite_only: bool) -> dict:
+        return {
+            'id': event[EventFields.ID],
+            'error_msg': _build_invite_only_error_message(event, should_be_invite_only)
+        }
 
     if not event[EventFields.CAREER_CENTER]:
         return None
     else:
-        return _get_error_str(event)
+        return _get_error_dict(event)
 
 
-def _get_ad_error(event: dict) -> Union[str, None]:
+def _event_has_ad_label(event: dict) -> bool:
+    return 'shared: advertisement' in event[EventFields.LABELS_LIST]
+
+
+def _event_has_wrong_type(event: dict) -> bool:
+    return event[EventFields.EVENT_TYPE] != 'Other'
+
+
+def _build_ad_error_message(event: dict) -> str:
+    base_error_str = f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should'
+    label_error_substr = 'be labeled "shared: advertisement"'
+    type_error_substr = 'have event type "Other"'
+    if (not _event_has_ad_label(event)) and _event_has_wrong_type(event):
+        return f'{base_error_str} {label_error_substr} and {type_error_substr}'
+    elif _event_has_wrong_type(event):
+        return f'{base_error_str} {type_error_substr}'
+    else:
+        return f'{base_error_str} {label_error_substr}'
+
+
+def _get_ad_error(event: dict) -> Union[dict, None]:
     def _event_is_office_hours_ad(event: dict) -> bool:
         return 'office hours' in event[EventFields.NAME].lower()
-
-    def _event_has_ad_label(event: dict) -> bool:
-        return 'shared: advertisement' in event[EventFields.LABELS_LIST]
-
-    def _event_has_wrong_type(event: dict) -> bool:
-        return event[EventFields.EVENT_TYPE] != 'Other'
 
     def _event_is_homewood(event: dict) -> bool:
         return event[EventFields.CAREER_CENTER] == 'Life Design Lab (Homewood)'
@@ -124,19 +145,14 @@ def _get_ad_error(event: dict) -> Union[str, None]:
     def _event_is_ad(event: dict) -> bool:
         return _event_is_homewood(event) and _event_is_office_hours_ad(event)
 
-    def _build_error_str(event: dict) -> str:
-        base_error_str = f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should'
-        label_error_substr = 'be labeled "shared: advertisement"'
-        type_error_substr = 'have event type "Other"'
-        if (not _event_has_ad_label(event)) and _event_has_wrong_type(event):
-            return f'{base_error_str} {label_error_substr} and {type_error_substr}'
-        elif _event_has_wrong_type(event):
-            return f'{base_error_str} {type_error_substr}'
-        else:
-            return f'{base_error_str} {label_error_substr}'
+    def _build_error_dict(event: dict) -> dict:
+        return {
+            'id': event[EventFields.ID],
+            'error_msg': _build_ad_error_message(event)
+        }
 
     if _event_is_ad(event) and (not _event_has_ad_label(event) or _event_has_wrong_type(event)):
-        return _build_error_str(event)
+        return _build_error_dict(event)
     else:
         return None
 

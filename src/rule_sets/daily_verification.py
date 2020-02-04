@@ -5,8 +5,7 @@ from autohandshake import HandshakeBrowser, InsightsPage, FileType
 
 from src.rules.appointment_rules import (
     past_appointments_have_finalized_status,
-    all_appointments_have_a_type,
-    parse_status_error_str
+    all_appointments_have_a_type
 )
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
@@ -34,7 +33,7 @@ def daily_verification(browser: HandshakeBrowser) -> tuple:
         (all_appointments_have_a_type, appts),
         (past_appointments_have_finalized_status, appts)
     ], _handle_daily_rule_report)
-    create_error_csv(past_appointments_have_finalized_status, appts, parse_status_error_str, APPT_STATUS_CSV_FILEPATH)
+    create_error_csv(past_appointments_have_finalized_status, appts, APPT_STATUS_CSV_FILEPATH)
     return (REPORT_FILEPATH, APPT_STATUS_CSV_FILEPATH)
 
 

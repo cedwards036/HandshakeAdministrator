@@ -1,28 +1,42 @@
 import re
 from datetime import datetime
+from typing import Union
 
 from src.insights_fields import AppointmentFields
 from src.rule_verification import make_rule
 
 
-def _get_appt_status_error(appt: dict):
-    def _build_appt_status_error_string(appt: dict) -> str:
-        return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
-                f'{appt[AppointmentFields.START_DATE_TIME]}) has status '
-                f'"{appt[AppointmentFields.STATUS]}"')
+def _build_appt_status_error_message(appt: dict) -> str:
+    return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
+            f'{appt[AppointmentFields.START_DATE_TIME]}) has status '
+            f'"{appt[AppointmentFields.STATUS]}"')
 
+
+def _get_appt_status_error(appt: dict) -> Union[dict, None]:
     incomplete_statuses = ['approved', 'requested', 'started']
     start_time = datetime.strptime(appt[AppointmentFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S')
     if appt[AppointmentFields.STATUS] in incomplete_statuses and start_time < datetime.now():
-        return _build_appt_status_error_string(appt)
+        return {
+            'id': appt[AppointmentFields.ID],
+            'error_msg': _build_appt_status_error_message(appt)
+        }
     else:
         return None
 
 
-def _get_appt_type_missing_error(appt: dict) -> str:
+def _build_appt_type_error_message(appt) -> str:
+    return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
+            f'{appt[AppointmentFields.START_DATE_TIME]}) does not have an appointment type')
+
+
+def _get_appt_type_missing_error(appt: dict) -> Union[dict, None]:
     if not appt[AppointmentFields.TYPE]:
-        return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
-                f'{appt[AppointmentFields.START_DATE_TIME]}) does not have an appointment type')
+        return {
+            'id': appt[AppointmentFields.ID],
+            'error_msg': _build_appt_type_error_message(appt)
+        }
+    else:
+        return None
 
 
 ##########################

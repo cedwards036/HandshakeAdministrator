@@ -4,7 +4,7 @@ from typing import Callable, List
 class VerificationResult:
     """The result of a single rule verification"""
 
-    def __init__(self, rule: str, is_verified: bool, errors: List[str] = None):
+    def __init__(self, rule: str, is_verified: bool, errors: List[dict] = None):
         if not errors:
             errors = []
         self._data = {
@@ -42,22 +42,7 @@ class VerificationResult:
         return str(self._data)
 
 
-def make_rule(rule: str, error_msg_func: Callable[[dict], str]) -> Callable[[List[dict]], VerificationResult]:
-    """
-    Make a new rule described by the given rule text.
-
-    :param rule: a string describing the rule. For example, "All appointments
-                 have an associated type"
-    :param error_msg_func: a function that, given a single data record, produces
-                           an appropriate error string, if needed. For example,
-                           a rule that analyzes a list of event data might use a
-                           function that returns "Event [event id] is named
-                           incorrectly" if it finds an error, and None otherwise.
-    :return: a rule-verifying function that, when given a list of relevant data
-             objects, produces a descriptive VerificationResult, including any
-             rule-breaking errors found during the verification.
-    """
-
+def make_rule(rule: str, error_func: Callable[[dict], str]) -> Callable[[List[dict]], VerificationResult]:
     def rule_function(records: List[dict]) -> VerificationResult:
         result = VerificationResult(
             rule=rule,
@@ -65,7 +50,7 @@ def make_rule(rule: str, error_msg_func: Callable[[dict], str]) -> Callable[[Lis
             errors=[]
         )
         for record in records:
-            error = error_msg_func(record)
+            error = error_func(record)
             if error is not None:
                 result.add_error(error)
         if len(result.errors) == 0:

@@ -2,20 +2,21 @@ import unittest
 from datetime import datetime, timedelta
 
 from src.insights_fields import AppointmentFields
-from src.rule_verification import VerificationResult
 from src.rules.appointment_rules import (
     past_appointments_have_finalized_status,
     all_appointments_have_a_type,
-    parse_status_error_str
+    parse_status_error_str,
+    _build_appt_type_error_message,
+    _build_appt_status_error_message
 )
+from test.common import assertIsVerified, assertContainsErrorIDs
 
 
 class TestAppointmentStatusCompleted(unittest.TestCase):
     RULE_NAME = 'No past appointments are marked as "approved", "requested", or "started"'
 
     def test_with_no_data(self):
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         past_appointments_have_finalized_status([]))
+        assertIsVerified(self, past_appointments_have_finalized_status([]))
 
     def test_future_appointments_are_fine(self):
         tomorrow_start_time = datetime.now() + timedelta(days=1)
@@ -40,8 +41,7 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
                 AppointmentFields.STAFF_MEMBER_LAST_NAME: "Smith"
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         past_appointments_have_finalized_status(appt_data))
+        assertIsVerified(self, past_appointments_have_finalized_status(appt_data))
 
     def test_completed_past_appointments_are_fine(self):
         appt_data = [
@@ -78,8 +78,7 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
                 AppointmentFields.STAFF_MEMBER_LAST_NAME: "Barns"
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         past_appointments_have_finalized_status(appt_data))
+        assertIsVerified(self, past_appointments_have_finalized_status(appt_data))
 
     def test_incomplete_past_appointments(self):
         appt_data = [
@@ -112,16 +111,26 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
             'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) has status "approved"',
             'Appointment 290392059 (Mary Smith, 2015-12-08 10:00:00) has status "started"'
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
-                         past_appointments_have_finalized_status(appt_data))
+        assertContainsErrorIDs(self, ['6352432', '290392059'], past_appointments_have_finalized_status(appt_data))
+
+    def test_type_error_message(self):
+        appt = {
+            AppointmentFields.ID: "6352432",
+            AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+            AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+            AppointmentFields.STATUS: "approved",
+            AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+            AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt"
+        }
+        expected = 'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) has status "approved"'
+        self.assertEqual(expected, _build_appt_status_error_message(appt))
 
 
 class TestAppointmentHasType(unittest.TestCase):
     RULE_NAME = 'All appointments have an associated appointment type'
 
     def test_with_no_data(self):
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         all_appointments_have_a_type([]))
+        assertIsVerified(self, all_appointments_have_a_type([]))
 
     def test_appointments_with_a_type_are_fine(self):
         appt_data = [
@@ -144,8 +153,7 @@ class TestAppointmentHasType(unittest.TestCase):
                 AppointmentFields.TYPE: "Interview Prep Type"
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         all_appointments_have_a_type(appt_data))
+        assertIsVerified(self, all_appointments_have_a_type(appt_data))
 
     def test_appointments_without_a_type(self):
         appt_data = [
@@ -168,12 +176,20 @@ class TestAppointmentHasType(unittest.TestCase):
                 AppointmentFields.TYPE: None
             },
         ]
-        expected_errors = [
-            'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) does not have an appointment type',
-            'Appointment 18536335 (Mary Smith, 2016-08-19 13:00:00) does not have an appointment type'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
-                         all_appointments_have_a_type(appt_data))
+        assertContainsErrorIDs(self, ['6352432', '18536335'], all_appointments_have_a_type(appt_data))
+
+    def test_type_error_message(self):
+        appt = {
+            AppointmentFields.ID: "6352432",
+            AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+            AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+            AppointmentFields.STATUS: "approved",
+            AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+            AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt",
+            AppointmentFields.TYPE: ""
+        }
+        expected = 'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) does not have an appointment type'
+        self.assertEqual(expected, _build_appt_type_error_message(appt))
 
 
 class TestErrorStringParser(unittest.TestCase):

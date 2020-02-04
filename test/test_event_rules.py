@@ -5,9 +5,13 @@ from src.insights_fields import EventFields
 from src.rule_verification import VerificationResult
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
+    _build_event_prefix_error_message,
     events_are_invite_only_iff_not_university_wide,
-    advertisement_events_are_labeled
+    _build_invite_only_error_message,
+    advertisement_events_are_labeled,
+    _build_ad_error_message
 )
+from test.common import assertContainsErrorIDs, assertIsVerified
 
 
 class TestEventsArePrefixedCorrectly(unittest.TestCase):
@@ -25,8 +29,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: None
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertIsVerified(self, jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_university_wide_is_valid(self):
         event_data = [
@@ -46,8 +49,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.PDCO
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertIsVerified(self, jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_test_prefix_is_valid(self):
         event_data = [
@@ -67,12 +69,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
         ]
-        expected_errors = [
-            'Event 5364354 (test- Drop-in Mondays HE September 9th Afternoon) should have prefix "PDCO:"',
-            'Event 26895576 (TESTING Career Clinic: Job Negotiation) should have prefix "SAIS:", "SAIS DC:", "SAIS Europe:", or "HNC:"'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertContainsErrorIDs(self, ['5364354', '26895576'], jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_cancelled_prefix_is_valid(self):
         event_data = [
@@ -97,12 +94,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
         ]
-        expected_errors = [
-            'Event 902820 (CANCELLED: Career Clinic: Job Negotiation) should have prefix "CANCELLED: PDCO:"',
-            'Event 2635346 (CANCELLED: SAISLeads Retreat) should have prefix "CANCELLED: SAIS:", "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertContainsErrorIDs(self, ['902820', '2635346'], jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_canceled_misspelling_gives_helpful_feedback(self):
         event_data = [
@@ -122,13 +114,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.PEABODY
             }
         ]
-        expected_errors = [
-            'Event 902820 (CANCELED: PDCO: Career Clinic: Job Negotiation) should have prefix "CANCELLED: PDCO:"',
-            'Event 2635346 (CAnCELEd: SAIS: SAISLeads Retreat) should have prefix "CANCELLED: SAIS:", "CANCELLED: SAIS DC:", "CANCELLED: SAIS Europe:", or "CANCELLED: HNC:"',
-            'Event 3263343 (Cancelled: Peabody: Launch Event) should have prefix "CANCELLED: Peabody:"'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertContainsErrorIDs(self, ['902820', '2635346', '3263343'], jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_with_one_of_each_bad_event(self):
         event_data = [
@@ -173,18 +159,8 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.BSPH
             }
         ]
-        expected_errors = [
-            'Event 353242 (Homewoo: 2019 JumpStart STEM Diversity Forum) should have prefix "Homewood:"',
-            'Event 8563254 (Cary: Drop-in Mondays HE September 9th Afternoon) should have prefix "Carey:"',
-            'Event 902820 (Univ. Wide: Career Clinic: Job Negotiation) should have prefix "PDCO:"',
-            'Event 2635346 (SAIS Europe SAISLeads Retreat) should have prefix "SAIS:", "SAIS DC:", "SAIS Europe:", or "HNC:"',
-            'Event 526433 (N: How to Find Your First Nursing Job) should have prefix "Nursing:"',
-            'Event 328092 (Strategies for Effective Professional Communication webinar) should have prefix "AAP:"',
-            'Event 940935 (Homewood: LAUNCH @ Lunch) should have prefix "Peabody:"',
-            'Event 5839252 (BSP: Student Activities Fair) should have prefix "BSPH:"'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        expected_error_ids = ['353242', '8563254', '902820', '2635346', '526433', '328092', '940935', '5839252']
+        assertContainsErrorIDs(self, expected_error_ids, jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_with_one_of_each_correct_event(self):
         event_data = [
@@ -244,8 +220,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.BSPH
             }
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertIsVerified(self, jhu_owned_events_are_prefixed_correctly(event_data))
 
     def test_with_all_event_types(self):
         event_data = [
@@ -295,21 +270,32 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: None
             },
         ]
-        expected_errors = [
-            'Event 526433 (N: How to Find Your First Nursing Job) should have prefix "Nursing:"',
-            'Event 328092 (Strategies for Effective Professional Communication webinar) should have prefix "AAP:"',
-            'Event 940935 (Homewood: LAUNCH @ Lunch) should have prefix "Peabody:"'
-        ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         jhu_owned_events_are_prefixed_correctly(event_data))
+        assertContainsErrorIDs(self, ['526433', '328092', '940935'], jhu_owned_events_are_prefixed_correctly(event_data))
+
+    def test_prefix_error_message_with_single_prefix(self):
+        event = {
+            EventFields.ID: '328092',
+            EventFields.NAME: 'Strategies for Effective Professional Communication webinar',
+            EventFields.CAREER_CENTER: CareerCenters.AAP
+        }
+        expected = 'Event 328092 (Strategies for Effective Professional Communication webinar) should have prefix "AAP:"'
+        self.assertEqual(expected, _build_event_prefix_error_message(event, ['AAP:']))
+
+    def test_prefix_error_message_with_multiple_prefixes(self):
+        event = {
+            EventFields.ID: '437858',
+            EventFields.NAME: 'SAIS Europe Vienna Career trek 2020: OPEC',
+            EventFields.CAREER_CENTER: CareerCenters.SAIS
+        }
+        expected = 'Event 437858 (SAIS Europe Vienna Career trek 2020: OPEC) should have prefix "SAIS:", "SAIS DC:", "SAIS Europe:", or "HNC:"'
+        self.assertEqual(expected, _build_event_prefix_error_message(event, ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:']))
 
 
 class TestEventsAreInviteOnly(unittest.TestCase):
     RULE_NAME = 'Events are invite-only if and only if they are not University-Wide or external'
 
     def test_no_data(self):
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         events_are_invite_only_iff_not_university_wide([]))
+        assertIsVerified(self, events_are_invite_only_iff_not_university_wide([]))
 
     def test_non_career_center_events(self):
         event_data = [
@@ -326,8 +312,7 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         events_are_invite_only_iff_not_university_wide(event_data))
+        assertIsVerified(self, events_are_invite_only_iff_not_university_wide(event_data))
 
     def test_university_wide_events(self):
         event_data = [
@@ -350,9 +335,7 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
-        expected_errors = ['Event 8290282 (University-Wide: Resume Workshop) should not be invite-only']
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
-                         events_are_invite_only_iff_not_university_wide(event_data))
+        assertContainsErrorIDs(self, ['8290282'], events_are_invite_only_iff_not_university_wide(event_data))
 
     def test_career_center_events(self):
         event_data = [
@@ -375,10 +358,7 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.IS_INVITE_ONLY: 'Yes'
             },
         ]
-        expected_errors = ['Event 38305945 (Homewood: Consulting Alumni Panel) should be invite-only',
-                           'Event 150925098 (Carey: Resume Workshop) should be invite-only']
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
-                         events_are_invite_only_iff_not_university_wide(event_data))
+        assertContainsErrorIDs(self, ['38305945', '150925098'], events_are_invite_only_iff_not_university_wide(event_data))
 
     def test_cancelled_prefix_doesnt_interefere(self):
         event_data = [
@@ -407,12 +387,17 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.IS_INVITE_ONLY: 'No'
             },
         ]
-        expected_errors = [
-            'Event 353242 (CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum) should not be invite-only',
-            'Event 2635346 (CANCELLED: SAIS DC: SAISLeads Retreat) should be invite-only']
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, errors=expected_errors),
-                         events_are_invite_only_iff_not_university_wide(event_data))
+        assertContainsErrorIDs(self, ['353242', '2635346'], events_are_invite_only_iff_not_university_wide(event_data))
 
+    def test_invite_only_error_message(self):
+        event = {
+            EventFields.ID: "353242",
+            EventFields.NAME: "A Fun Event",
+        }
+        should_expected = 'Event 353242 (A Fun Event) should be invite-only'
+        shouldnt_expected = 'Event 353242 (A Fun Event) should not be invite-only'
+        self.assertEqual(should_expected, _build_invite_only_error_message(event, True))
+        self.assertEqual(shouldnt_expected, _build_invite_only_error_message(event, False))
 
 class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
     RULE_NAME = '"Advertisement" events are labeled properly and have event type "Other"'
@@ -445,8 +430,7 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
             'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement"',
             'Event 331585 (Homewood: office hours with Tessa) should be labeled "shared: advertisement"'
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         advertisement_events_are_labeled(event_data))
+        assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
 
     def test_with_multiple_labels(self):
         event_data = [
@@ -458,8 +442,7 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
                 EventFields.LABELS_LIST: 'hwd: stem, shared: advertisement, hwd: virtual'
             }
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         advertisement_events_are_labeled(event_data))
+        assertIsVerified(self, advertisement_events_are_labeled(event_data))
 
     def test_rule_flags_events_with_wrong_event_type(self):
         event_data = [
@@ -482,8 +465,7 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
             'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"',
             'Event 331585 (Homewood: office hours with Tessa) should have event type "Other"'
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, False, expected_errors),
-                         advertisement_events_are_labeled(event_data))
+        assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
 
     def test_doesnt_flag_non_homewood_office_hours(self):
         event_data = [
@@ -495,5 +477,15 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
                 EventFields.LABELS_LIST: ''
             },
         ]
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         advertisement_events_are_labeled(event_data))
+        assertIsVerified(self, advertisement_events_are_labeled(event_data))
+
+    def test_ad_error_message(self):
+        event = {
+            EventFields.ID: "288569",
+            EventFields.NAME: "Homewood: WSE Office Hours",
+            EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+            EventFields.EVENT_TYPE: 'Group Appointment',
+            EventFields.LABELS_LIST: ''
+        }
+        expected = 'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"'
+        self.assertEqual(expected, _build_ad_error_message(event))

@@ -14,7 +14,7 @@ class VerificationReport:
             if rule_result.is_verified:
                 self._verified.append(rule_result.rule)
             else:
-                self._broken[rule_result.rule] = rule_result.errors
+                self._broken[rule_result.rule] = [error['error_msg'] for error in rule_result.errors]
 
     @property
     def verified(self):
@@ -73,8 +73,7 @@ def run_rule_verifications(rules: List[tuple] = None, callback: Callable = print
     callback(report)
 
 
-def create_error_csv(verification_func: callable, data: List[dict],
-                     error_parser: callable, filepath: str) -> str:
+def create_error_csv(verification_func: callable, data: List[dict], filepath: str) -> str:
     """
     Given a rule to verify and some data to verify against, create a CSV file
     detailing any rule-breaking records.
@@ -84,9 +83,7 @@ def create_error_csv(verification_func: callable, data: List[dict],
     :param filepath: the filepath where the CSV should be written
     :return: the resulting filepath of the new CSV
     """
-    verification_result = verification_func(data)
-    csv_data = verification_result.parse_errors(error_parser)
-    to_csv(csv_data, filepath)
+    to_csv(verification_func(data).errors, filepath)
     return filepath
 
 

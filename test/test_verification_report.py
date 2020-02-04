@@ -24,7 +24,7 @@ class TestVerificationReport(unittest.TestCase):
             'broken': {'All numbers should be even': ['3 is not even', '5 is not even']}
         }, VerificationReport([VerificationResult('All dogs should be cute', True),
                                VerificationResult('All numbers should be even', False,
-                                                  ['3 is not even', '5 is not even'])]).as_dict())
+                                                  [{'error_msg': '3 is not even'}, {'error_msg': '5 is not even'}])]).as_dict())
 
     def test_verification_report_equality(self):
         no_results = VerificationReport([])
@@ -33,8 +33,8 @@ class TestVerificationReport(unittest.TestCase):
             VerificationResult('All dogs should be good', True),
             VerificationResult('All cats should be ok I guess', True),
             VerificationResult('All numbers should be even', False, [
-                '3 is not even',
-                '5 is not even'
+                {'error_msg': '3 is not even'},
+                {'error_msg': '5 is not even'}
             ])])
 
         self.assertEqual(VerificationReport([]), no_results)
@@ -45,8 +45,8 @@ class TestVerificationReport(unittest.TestCase):
             VerificationResult('All dogs should be good', True),
             VerificationResult('All cats should be ok I guess', True),
             VerificationResult('All numbers should be even', False, [
-                '3 is not even',
-                '5 is not even'
+                {'error_msg': '3 is not even'},
+                {'error_msg': '5 is not even'}
             ])]), three_results)
 
     def test_report_str_with_no_results(self):
@@ -69,7 +69,7 @@ class TestVerificationReport(unittest.TestCase):
 
     def test_report_str_with_one_broken(self):
         test_report = VerificationReport(
-            [VerificationResult('All numbers should be even', False, ['3 is not even', '5 is not even'])])
+            [VerificationResult('All numbers should be even', False, [{'error_msg': '3 is not even'}, {'error_msg': '5 is not even'}])])
         expected = ('================== Verification Report ===================\n'
                     '\n'
                     'Rules broken:\n'
@@ -86,13 +86,13 @@ class TestVerificationReport(unittest.TestCase):
             VerificationResult('All dogs should be good', True),
             VerificationResult('All cats should be ok I guess', True),
             VerificationResult('All numbers should be even', False, [
-                '3 is not even',
-                '5 is not even'
+                {'error_msg': '3 is not even'},
+                {'error_msg': '5 is not even'}
             ]),
             VerificationResult('People should eat no more than four hot dogs at a time', False, [
-                'Jimmy ate five hot dogs',
-                'Sarah ate thirty hot dogs',
-                'Scout ate two hundred hot dogs'
+                {'error_msg': 'Jimmy ate five hot dogs'},
+                {'error_msg': 'Sarah ate thirty hot dogs'},
+                {'error_msg': 'Scout ate two hundred hot dogs'}
             ])
         ])
         expected = ('================== Verification Report ===================\n'
@@ -139,14 +139,15 @@ class TestVerifyRules(unittest.TestCase):
             result = VerificationResult('All numbers should be even', True)
             for n in data:
                 if n % 2 != 0:
-                    result.add_error(f'{n} is odd')
+                    result.add_error({'error_msg': f'{n} is odd'})
                     result.is_verified = False
             return result
 
         expected = [
             VerificationResult('The sky should be blue', True),
             VerificationResult('All numbers should be even', False,
-                               ['5 is odd', '7 is odd'])
+                               [{'error_msg': '5 is odd'},
+                                {'error_msg': '7 is odd'}])
         ]
 
         self.assertEqual(expected, _verify_rules([
