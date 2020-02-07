@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union
 
 from src.constants import CareerCenters
@@ -91,15 +92,21 @@ def _build_invite_only_error_message(event: dict, should_be_invite_only: bool) -
 
 
 def _get_invite_error(event: dict) -> Union[dict, None]:
+    def _event_is_upcoming(event: dict) -> bool:
+        return datetime.strptime(event[EventFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S') > datetime.now()
+
     def _event_is_invite_only(event: dict) -> bool:
         return event[EventFields.IS_INVITE_ONLY] == 'Yes'
 
     def _get_error_dict(event: dict) -> Union[dict, None]:
         cleaned_event_name = _strip_cancelled_prefix_from_event_name(event[EventFields.NAME])
-        if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
-            return _build_invite_only_error_dict(event, should_be_invite_only=False)
-        elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
-            return _build_invite_only_error_dict(event, should_be_invite_only=True)
+        if _event_is_upcoming(event):
+            if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
+                return _build_invite_only_error_dict(event, should_be_invite_only=False)
+            elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
+                return _build_invite_only_error_dict(event, should_be_invite_only=True)
+            else:
+                return None
         else:
             return None
 

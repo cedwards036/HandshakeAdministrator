@@ -1,8 +1,8 @@
 import unittest
+from datetime import datetime, timedelta
 
 from src.constants import CareerCenters
 from src.insights_fields import EventFields
-from src.rule_verification import VerificationResult
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
     _build_event_prefix_error_message,
@@ -18,8 +18,7 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
     RULE_NAME = 'Events are prefixed correctly if they are owned by a career center'
 
     def test_with_no_data(self):
-        self.assertEqual(VerificationResult(self.RULE_NAME, True),
-                         jhu_owned_events_are_prefixed_correctly([]))
+        assertIsVerified(self, jhu_owned_events_are_prefixed_correctly([]))
 
     def test_with_non_career_center_event(self):
         event_data = [
@@ -293,6 +292,8 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
 
 class TestEventsAreInviteOnly(unittest.TestCase):
     RULE_NAME = 'Events are invite-only if and only if they are not University-Wide or external'
+    IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+    IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
 
     def test_no_data(self):
         assertIsVerified(self, events_are_invite_only_iff_not_university_wide([]))
@@ -303,13 +304,15 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.ID: "4324725",
                 EventFields.NAME: "McKinsey Virtual Session",
                 EventFields.CAREER_CENTER: None,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "4625224",
                 EventFields.NAME: "CIA Recruitment Event",
                 EventFields.CAREER_CENTER: None,
-                EventFields.IS_INVITE_ONLY: 'Yes'
+                EventFields.IS_INVITE_ONLY: 'Yes',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
         ]
         assertIsVerified(self, events_are_invite_only_iff_not_university_wide(event_data))
@@ -320,19 +323,22 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.ID: "6336475",
                 EventFields.NAME: "University-Wide: Consulting Alumni Panel",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "9892820",
                 EventFields.NAME: "University-Wide: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "8290282",
                 EventFields.NAME: "University-Wide: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
-                EventFields.IS_INVITE_ONLY: 'Yes'
+                EventFields.IS_INVITE_ONLY: 'Yes',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['8290282'], events_are_invite_only_iff_not_university_wide(event_data))
@@ -343,19 +349,22 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.ID: "38305945",
                 EventFields.NAME: "Homewood: Consulting Alumni Panel",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "150925098",
                 EventFields.NAME: "Carey: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "95739393",
                 EventFields.NAME: "PDCO: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
-                EventFields.IS_INVITE_ONLY: 'Yes'
+                EventFields.IS_INVITE_ONLY: 'Yes',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['38305945', '150925098'], events_are_invite_only_iff_not_university_wide(event_data))
@@ -366,28 +375,51 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.ID: "353242",
                 EventFields.NAME: "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.IS_INVITE_ONLY: 'Yes'
+                EventFields.IS_INVITE_ONLY: 'Yes',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "8563254",
                 EventFields.NAME: "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
-                EventFields.IS_INVITE_ONLY: 'Yes'
+                EventFields.IS_INVITE_ONLY: 'Yes',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "902820",
                 EventFields.NAME: "CANCELLED: University-Wide: Career Clinic: Job Negotiation",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
             {
                 EventFields.ID: "2635346",
                 EventFields.NAME: "CANCELLED: SAIS DC: SAISLeads Retreat",
                 EventFields.CAREER_CENTER: CareerCenters.SAIS,
-                EventFields.IS_INVITE_ONLY: 'No'
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['353242', '2635346'], events_are_invite_only_iff_not_university_wide(event_data))
+
+    def test_ignores_past_events(self):
+        event_data = [
+            {
+                EventFields.ID: "38305945",
+                EventFields.NAME: "Homewood: Consulting Alumni Panel",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_PAST
+            },
+            {
+                EventFields.ID: "150925098",
+                EventFields.NAME: "Carey: Resume Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.CAREY,
+                EventFields.IS_INVITE_ONLY: 'No',
+                EventFields.START_DATE_TIME: self.IN_THE_PAST
+            },
+        ]
+        assertIsVerified(self, events_are_invite_only_iff_not_university_wide(event_data))
 
     def test_invite_only_error_message(self):
         event = {
