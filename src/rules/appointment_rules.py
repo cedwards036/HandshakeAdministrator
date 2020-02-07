@@ -1,6 +1,5 @@
-import re
 from datetime import datetime
-from typing import Union
+from typing import Union, Callable
 
 from src.insights_fields import AppointmentFields
 from src.rule_verification import make_rule
@@ -14,14 +13,15 @@ def _build_appt_status_error_message(appt: dict) -> str:
 
 def _get_appt_status_error(appt: dict) -> Union[dict, None]:
     incomplete_statuses = ['approved', 'requested', 'started']
-    start_time = datetime.strptime(appt[AppointmentFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S')
-    if appt[AppointmentFields.STATUS] in incomplete_statuses and start_time < datetime.now():
-        return {
-            'id': appt[AppointmentFields.ID],
-            'error_msg': _build_appt_status_error_message(appt)
-        }
+    start_date_time = _parse_date_time(appt[AppointmentFields.START_DATE_TIME])
+    if appt[AppointmentFields.STATUS] in incomplete_statuses and start_date_time < datetime.now():
+        return _extract_error_data_from_appt(appt, _build_appt_status_error_message)
     else:
         return None
+
+
+def _parse_date_time(date_time_str: str) -> datetime:
+    return datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
 
 
 def _build_appt_type_error_message(appt) -> str:
@@ -31,45 +31,24 @@ def _build_appt_type_error_message(appt) -> str:
 
 def _get_appt_type_missing_error(appt: dict) -> Union[dict, None]:
     if not appt[AppointmentFields.TYPE]:
-        return {
-            'id': appt[AppointmentFields.ID],
-            'error_msg': _build_appt_type_error_message(appt)
-        }
+        return _extract_error_data_from_appt(appt, _build_appt_type_error_message)
     else:
         return None
 
 
+def _extract_error_data_from_appt(appt: dict, error_msg_func: Callable[[dict], str]) -> dict:
+    return {
+        'id': appt[AppointmentFields.ID],
+        'start_date_time': _parse_date_time(appt[AppointmentFields.START_DATE_TIME]),
+        'staff_last_name': appt[AppointmentFields.STAFF_MEMBER_LAST_NAME],
+        'staff_first_name': appt[AppointmentFields.STAFF_MEMBER_FIRST_NAME],
+        'url': f'https://app.joinhandshake.com/appointments/{appt[AppointmentFields.ID]}',
+        'error_msg': error_msg_func(appt)
+    }
+
 ##########################
 # HELPER/SUB-FUNCTIONS
 ##########################
-
-
-def parse_status_error_str(status_error_str: str) -> dict:
-    """
-    Parse an appointment status error into a dictionary.
-
-    :param status_error_str: the error string to parse
-    :return: a dictionary with fields for appt id, Handshake url, staff name, appt
-             datetime, and appt status
-    """
-
-    def parse_datetime_str(datetime_str: str) -> datetime:
-        return datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
-
-    regex = '^Appointment ([0-9]+) \((.+), (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\) has status \"([a-z]+)\"$'
-    try:
-        parsed_fields = re.match(regex, status_error_str).groups()
-        return {
-            'id': parsed_fields[0],
-            'url': f'https://app.joinhandshake.com/appointments/{parsed_fields[0]}',
-            'staff_name': parsed_fields[1],
-            'datetime': parse_datetime_str(parsed_fields[2]),
-            'status': parsed_fields[3]
-        }
-    except AttributeError:
-        raise ValueError(f'Invalid error str: "{status_error_str}"')
-
-
 
 def _get_staff_name(appt: dict) -> str:
     return (appt[AppointmentFields.STAFF_MEMBER_FIRST_NAME].strip() + ' ' +

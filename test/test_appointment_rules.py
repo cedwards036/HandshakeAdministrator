@@ -5,9 +5,9 @@ from src.insights_fields import AppointmentFields
 from src.rules.appointment_rules import (
     past_appointments_have_finalized_status,
     all_appointments_have_a_type,
-    parse_status_error_str,
     _build_appt_type_error_message,
-    _build_appt_status_error_message
+    _build_appt_status_error_message,
+    _extract_error_data_from_appt,
 )
 from test.common import assertIsVerified, assertContainsErrorIDs
 
@@ -107,10 +107,6 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
                 AppointmentFields.STAFF_MEMBER_LAST_NAME: "Walker"
             },
         ]
-        expected_errors = [
-            'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) has status "approved"',
-            'Appointment 290392059 (Mary Smith, 2015-12-08 10:00:00) has status "started"'
-        ]
         assertContainsErrorIDs(self, ['6352432', '290392059'], past_appointments_have_finalized_status(appt_data))
 
     def test_type_error_message(self):
@@ -191,26 +187,23 @@ class TestAppointmentHasType(unittest.TestCase):
         expected = 'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) does not have an appointment type'
         self.assertEqual(expected, _build_appt_type_error_message(appt))
 
-
-class TestErrorStringParser(unittest.TestCase):
-
-    def test_status_error_parser(self):
-        test_strs = [
-            'Appointment 4124582 (MaryAnn Riegelman, 2019-07-23 15:00:00) has status "approved"',
-            'Appointment 4167709 (Jenn Leard- Consulting, 2019-08-14 16:30:00) has status "started"',
-            'Appointment 4383184 (Roni White, 2019-09-19 14:00:00) has status "approved"'
-        ]
-
-        expected = [
-            {'id': '4124582', 'url': 'https://app.joinhandshake.com/appointments/4124582',
-             'staff_name': 'MaryAnn Riegelman', 'datetime': datetime(2019, 7, 23, 15), 'status': 'approved'},
-            {'id': '4167709', 'url': 'https://app.joinhandshake.com/appointments/4167709',
-             'staff_name': 'Jenn Leard- Consulting', 'datetime': datetime(2019, 8, 14, 16, 30), 'status': 'started'},
-            {'id': '4383184', 'url': 'https://app.joinhandshake.com/appointments/4383184', 'staff_name': 'Roni White',
-             'datetime': datetime(2019, 9, 19, 14), 'status': 'approved'}
-        ]
-        actual = [parse_status_error_str(error_str) for error_str in test_strs]
-        self.assertEqual(expected, actual)
+    def test_error_dict(self):
+        appt = {
+            AppointmentFields.ID: "6352432",
+            AppointmentFields.START_DATE_TIME: "2018-05-28 15:30:00",
+            AppointmentFields.END_DATE_TIME: "2018-05-28 16:00:00",
+            AppointmentFields.STATUS: "approved",
+            AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
+            AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt",
+            AppointmentFields.TYPE: ""
+        }
+        error = _extract_error_data_from_appt(appt, lambda x: 'error!')
+        self.assertEqual('6352432', error['id'])
+        self.assertEqual(datetime(2018, 5, 28, 15, 30), error['start_date_time'])
+        self.assertEqual('Vanderbildt', error['staff_last_name'])
+        self.assertEqual('Alex', error['staff_first_name'])
+        self.assertEqual('https://app.joinhandshake.com/appointments/6352432', error['url'])
+        self.assertEqual('error!', error['error_msg'])
 
 def format_datetime(date_time):
     return date_time.strftime('%Y-%m-%d %H:%M:%S')
