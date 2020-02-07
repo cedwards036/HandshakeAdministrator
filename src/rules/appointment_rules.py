@@ -7,8 +7,7 @@ from src.rule_verification import make_rule
 
 def _build_appt_status_error_message(appt: dict) -> str:
     return (f'Appointment {appt[AppointmentFields.ID]} ({_get_staff_name(appt)}, '
-            f'{appt[AppointmentFields.START_DATE_TIME]}) has status '
-            f'"{appt[AppointmentFields.STATUS]}"')
+            f'{appt[AppointmentFields.START_DATE_TIME]}) status should be one of "completed", "cancelled", or "no-show"')
 
 
 def _get_appt_status_error(appt: dict) -> Union[dict, None]:
@@ -61,10 +60,12 @@ def _get_staff_name(appt: dict) -> str:
 
 past_appointments_have_finalized_status = make_rule(
     'No past appointments are marked as "approved", "requested", or "started"',
+    'appt_wrong_status',
     _get_appt_status_error
 )
 
 all_appointments_have_a_type = make_rule(
     'All appointments have an associated appointment type',
+    'appt_missing_type',
     _get_appt_type_missing_error
 )

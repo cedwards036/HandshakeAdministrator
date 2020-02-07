@@ -118,7 +118,7 @@ class TestAppointmentStatusCompleted(unittest.TestCase):
             AppointmentFields.STAFF_MEMBER_FIRST_NAME: "Alex",
             AppointmentFields.STAFF_MEMBER_LAST_NAME: "Vanderbildt"
         }
-        expected = 'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) has status "approved"'
+        expected = 'Appointment 6352432 (Alex Vanderbildt, 2018-05-28 15:30:00) status should be one of "completed", "cancelled", or "no-show"'
         self.assertEqual(expected, _build_appt_status_error_message(appt))
 
 

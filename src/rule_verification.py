@@ -4,11 +4,12 @@ from typing import Callable, List
 class VerificationResult:
     """The result of a single rule verification"""
 
-    def __init__(self, rule: str, errors: List[dict] = None):
+    def __init__(self, rule: str, rule_abbrev: str, errors: List[dict] = None):
         if not errors:
             errors = []
         self._data = {
             'rule': rule,
+            'rule_abbrev': rule_abbrev,
             'errors': errors
         }
 
@@ -18,6 +19,10 @@ class VerificationResult:
     @property
     def rule(self):
         return self._data['rule']
+
+    @property
+    def rule_abbrev(self):
+        return self._data['rule_abbrev']
 
     @property
     def is_verified(self):
@@ -38,10 +43,11 @@ class VerificationResult:
         return str(self._data)
 
 
-def make_rule(rule: str, error_func: Callable[[dict], dict]) -> Callable[[List[dict]], VerificationResult]:
+def make_rule(rule: str, rule_abbrev: str, error_func: Callable[[dict], dict]) -> Callable[[List[dict]], VerificationResult]:
     def rule_function(records: List[dict]) -> VerificationResult:
         result = VerificationResult(
             rule=rule,
+            rule_abbrev=rule_abbrev,
             errors=[]
         )
         for record in records:

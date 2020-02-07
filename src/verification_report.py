@@ -1,4 +1,5 @@
-from typing import List, Callable
+import os
+from typing import List
 
 from src.rule_verification import VerificationResult
 from src.utils import to_csv
@@ -59,21 +60,7 @@ class VerificationReport:
         return result
 
 
-def run_rule_verifications(rules: List[tuple] = None, callback: Callable = print):
-    """
-    Given a list of rules to check and their associated data, verify the rules and output a report.
-
-    :param rules: a list of tuples of the form: (verification_func, data)
-    :param callback: a function to which to pass the generated report. For example,
-                     pass "print" to print the report to the console, or pass a
-                     function that writes the report to a file on disk.
-    """
-    verification_results = _verify_rules(rules)
-    report = VerificationReport(verification_results)
-    callback(report)
-
-
-def create_error_csv(verification_func: callable, data: List[dict], filepath: str) -> str:
+def create_error_csv(verification_result: VerificationResult, dir_path: str) -> str:
     """
     Given a rule to verify and some data to verify against, create a CSV file
     detailing any rule-breaking records.
@@ -83,19 +70,18 @@ def create_error_csv(verification_func: callable, data: List[dict], filepath: st
     :param filepath: the filepath where the CSV should be written
     :return: the resulting filepath of the new CSV
     """
-    to_csv(verification_func(data).errors, filepath)
+    filepath = os.path.join(dir_path, f'{verification_result.rule_abbrev}.csv')
+    to_csv(verification_result.errors, filepath)
     return filepath
 
 
-def _verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
+def verify_rules(rules: List[tuple] = None) -> List[VerificationResult]:
     """Given a list of rules to check and their associated data, verify the rules.
 
     :param rules: a list of tuples of the form: (verification_func, data)
     :returns: a list of rule verification results, one for each rule that was tested
     """
-    if not rules:
+    if rules is not None:
+        return [rule[0](rule[1]) for rule in rules]
+    else:
         return []
-    results = []
-    for rule in rules:
-        results.append(rule[0](rule[1]))
-    return results

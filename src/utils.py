@@ -48,16 +48,26 @@ def open_config_for_editing():
 
 config = load_config()
 
+
+def _get_chromedriver_path() -> str:
+    if getattr(sys, 'frozen', False):
+        # executed as a bundled exe, the driver is in the extracted folder
+        return os.path.join(sys._MEIPASS, "src", "chromedriver.exe")
+    else:
+        # executed as a simple script, the driver should be in `PATH`
+        return "./chromedriver.exe"
+
+
 class BrowsingSession(HandshakeSession):
     """
     A wrapper class around HandshakeSession that always logs into the account
     specified in the config file.
     """
 
-    def __init__(self, password=None, max_wait_time=300):
+    def __init__(self, password=None, max_wait_time=300, chromedriver_path=_get_chromedriver_path()):
         super().__init__(config['handshake_url'], config['handshake_email'],
                          password=password, download_dir=config['download_dir'],
-                         max_wait_time=max_wait_time, chromedriver_path=_get_chromedriver_path())
+                         max_wait_time=max_wait_time, chromedriver_path=chromedriver_path)
 
 
 def to_csv(list_of_dicts: List[dict], file_path: str):
@@ -153,12 +163,3 @@ def _create_or_statement_from(items):
     result += '", "'.join(items[:-1])
     result += f'", or "{items[-1]}"'
     return result
-
-
-def _get_chromedriver_path() -> str:
-    if getattr(sys, 'frozen', False):
-        # executed as a bundled exe, the driver is in the extracted folder
-        return os.path.join(sys._MEIPASS, "src", "chromedriver.exe")
-    else:
-        # executed as a simple script, the driver should be in `PATH`
-        return "./chromedriver.exe"

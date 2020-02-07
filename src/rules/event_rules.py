@@ -184,15 +184,18 @@ def _event_is_university_wide(event_name: str) -> bool:
 
 jhu_owned_events_are_prefixed_correctly = make_rule(
     'Events are prefixed correctly if they are owned by a career center',
+    'event_wrong_prefix',
     _get_event_prefix_error
 )
 
 events_are_invite_only_iff_not_university_wide = make_rule(
     'Events are invite-only if and only if they are not University-Wide or external',
+    'event_invite_only',
     _get_invite_error
 )
 
 advertisement_events_are_labeled = make_rule(
     '"Advertisement" events are labeled properly and have event type "Other"',
+    'event_advertisements',
     _get_ad_error
 )
