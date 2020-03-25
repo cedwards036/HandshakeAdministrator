@@ -1,9 +1,11 @@
 from typing import List
 
 from autohandshake import (HandshakeBrowser, MajorSettingsPage, AccessRequestPage,
-                           RequestStatus, LabelSettingsPage, AppointmentTypesListPage)
+                           RequestStatus, LabelSettingsPage, AppointmentTypesListPage,
+                           StaffPage, InsightsPage, FileType)
 
-from src.utils import to_csv, get_datestamped_filename, create_filepath_in_download_dir
+from src.utils import to_csv, get_datestamped_filename, \
+    create_filepath_in_download_dir, config, read_and_delete_json
 
 DESTINATION_FILEPATH = r'S:\Reporting & Data\One-Off Reports\rejected_students.csv'
 
@@ -88,6 +90,29 @@ def download_appointment_type_settings(browser: HandshakeBrowser) -> str:
     type_settings = types_page.get_type_settings()
     to_csv(type_settings, output_filepath)
     return output_filepath
+
+
+def download_staff(browser: HandshakeBrowser) -> str:
+    def _get_staff_insights_data(browser: HandshakeBrowser):
+        STAFF_INSIGHTS_URL = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vY2FyZWVyX3NlcnZpY2Vfc3RhZmZzP3FpZD1Bc2lZUEJpWVlaczNUYTVRMGdmODNsJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
+        insights_page = InsightsPage(STAFF_INSIGHTS_URL, browser)
+        filepath = insights_page.download_file(config['download_dir'], file_type=FileType.JSON)
+        return read_and_delete_json(filepath)
+
+    output_filepath = _create_csv_filepath('handshake_staff')
+    staff_page = StaffPage(browser)
+    staff_names = staff_page.get_staff_names()
+    insights_data = _get_staff_insights_data(browser)
+    to_csv(merge_staff_data(staff_names, insights_data), output_filepath)
+    return output_filepath
+
+
+def merge_staff_data(names: List[str], insights_data: List[dict]):
+    def _full_name(insights_row: dict):
+        return f"{insights_row['Career Service Staffs First Name'].strip()} {insights_row['Career Service Staffs Last Name'].strip()}"
+
+    names_set = set(names)
+    return [row for row in insights_data if _full_name(row) in names_set]
 
 
 def _create_csv_filepath(filename: str):
