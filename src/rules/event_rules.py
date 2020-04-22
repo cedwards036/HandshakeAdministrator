@@ -224,7 +224,7 @@ advertisement_events_are_labeled = make_rule(
 )
 
 past_events_do_not_have_virtual_event_type = make_rule(
-    '',
+    'Non-external past events do not have the "Virtual Session" event type',
     'past_event_virtual_session',
     _get_virtual_session_error
 )
