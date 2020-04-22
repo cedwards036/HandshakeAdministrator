@@ -164,6 +164,28 @@ def _get_ad_error(event: dict) -> Union[dict, None]:
         return None
 
 
+def _get_virtual_session_error(event: dict) -> Union[dict, None]:
+    def is_virtual_session(event: dict) -> bool:
+        return event[EventFields.EVENT_TYPE] == 'Virtual Session'
+
+    def is_past_event(event: dict) -> bool:
+        return datetime.strptime(event[EventFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S') < datetime.now()
+
+    def is_external_event(event: dict) -> bool:
+        return not event[EventFields.CAREER_CENTER]
+
+    def build_error_msg(event: dict) -> str:
+        return f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should not have the "Virtual Session" event type'
+
+    if is_past_event(event) and is_virtual_session(event) and not is_external_event(event):
+        return {
+            'id': event[EventFields.ID],
+            'error_msg': build_error_msg(event)
+        }
+    else:
+        return None
+
+
 ###########################
 # GENERAL HELPER FUNCTIONS
 ###########################
@@ -177,6 +199,7 @@ def _strip_cancelled_prefix_from_event_name(event_name: str) -> str:
 
 def _event_is_university_wide(event_name: str) -> bool:
     return event_name.startswith(UNIVERSITY_WIDE_PREFIX)
+
 
 ############################
 # RULES
@@ -198,4 +221,10 @@ advertisement_events_are_labeled = make_rule(
     '"Advertisement" events are labeled properly and have event type "Other"',
     'event_advertisements',
     _get_ad_error
+)
+
+past_events_do_not_have_virtual_event_type = make_rule(
+    '',
+    'past_event_virtual_session',
+    _get_virtual_session_error
 )

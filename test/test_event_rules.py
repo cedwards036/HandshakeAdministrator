@@ -9,13 +9,13 @@ from src.rules.event_rules import (
     events_are_invite_only_iff_not_university_wide,
     _build_invite_only_error_message,
     advertisement_events_are_labeled,
-    _build_ad_error_message
+    _build_ad_error_message,
+    past_events_do_not_have_virtual_event_type
 )
 from test.common import assertContainsErrorIDs, assertIsVerified
 
 
 class TestEventsArePrefixedCorrectly(unittest.TestCase):
-    RULE_NAME = 'Events are prefixed correctly if they are owned by a career center'
 
     def test_with_no_data(self):
         assertIsVerified(self, jhu_owned_events_are_prefixed_correctly([]))
@@ -291,7 +291,6 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
 
 
 class TestEventsAreInviteOnly(unittest.TestCase):
-    RULE_NAME = 'Events are invite-only if and only if they are not University-Wide or external'
     IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
     IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -431,8 +430,8 @@ class TestEventsAreInviteOnly(unittest.TestCase):
         self.assertEqual(should_expected, _build_invite_only_error_message(event, True))
         self.assertEqual(shouldnt_expected, _build_invite_only_error_message(event, False))
 
+
 class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
-    RULE_NAME = '"Advertisement" events are labeled properly and have event type "Other"'
 
     def test_rule_flags_homewood_office_hours_events(self):
         event_data = [
@@ -457,10 +456,6 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
                 EventFields.EVENT_TYPE: 'Workshop',
                 EventFields.LABELS_LIST: ''
             },
-        ]
-        expected_errors = [
-            'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement"',
-            'Event 331585 (Homewood: office hours with Tessa) should be labeled "shared: advertisement"'
         ]
         assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
 
@@ -493,10 +488,6 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
                 EventFields.LABELS_LIST: 'shared: advertisement'
             },
         ]
-        expected_errors = [
-            'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"',
-            'Event 331585 (Homewood: office hours with Tessa) should have event type "Other"'
-        ]
         assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
 
     def test_doesnt_flag_non_homewood_office_hours(self):
@@ -521,3 +512,50 @@ class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
         }
         expected = 'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"'
         self.assertEqual(expected, _build_ad_error_message(event))
+
+
+class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
+    IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+    IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+
+    def test_events_without_the_virtual_event_type_are_ok(self):
+        events = [{
+            EventFields.ID: "666484",
+            EventFields.NAME: '',
+            EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+            EventFields.EVENT_TYPE: 'Info Session',
+            EventFields.START_DATE_TIME: self.IN_THE_PAST
+        }]
+        assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
+
+    def test_future_events_are_ok(self):
+        events = [{
+            EventFields.ID: "119437",
+            EventFields.NAME: '',
+            EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+            EventFields.EVENT_TYPE: 'Virtual Session',
+            EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+        }]
+        assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
+
+    def test_past_external_events_are_ok(self):
+        events = [{
+            EventFields.ID: "119437",
+            EventFields.NAME: '',
+            EventFields.CAREER_CENTER: None,
+            EventFields.EVENT_TYPE: 'Virtual Session',
+            EventFields.START_DATE_TIME: self.IN_THE_PAST
+        }]
+        assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
+
+    def test_past_jhu_events_with_virtual_event_type_are_not_ok(self):
+        events = [{
+            EventFields.ID: '354987',
+            EventFields.NAME: 'Homewood: Deloitte Info Session',
+            EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+            EventFields.EVENT_TYPE: 'Virtual Session',
+            EventFields.START_DATE_TIME: self.IN_THE_PAST
+        }]
+        result = past_events_do_not_have_virtual_event_type(events)
+        assertContainsErrorIDs(self, ['354987'], result)
+        self.assertEqual('Event 354987 (Homewood: Deloitte Info Session) should not have the "Virtual Session" event type', result.errors[0]['error_msg'])

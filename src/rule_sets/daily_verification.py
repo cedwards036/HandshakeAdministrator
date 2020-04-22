@@ -12,7 +12,8 @@ from src.rules.appointment_rules import (
 from src.rules.event_rules import (
     jhu_owned_events_are_prefixed_correctly,
     events_are_invite_only_iff_not_university_wide,
-    advertisement_events_are_labeled
+    advertisement_events_are_labeled,
+    past_events_do_not_have_virtual_event_type
 )
 from src.utils import (write_to_file, BrowsingSession, create_filepath_in_download_dir,
                        get_datestamped_filename, read_and_delete_json, config)
@@ -33,6 +34,7 @@ def daily_verification(browser: HandshakeBrowser) -> str:
         (jhu_owned_events_are_prefixed_correctly, events),
         (events_are_invite_only_iff_not_university_wide, events),
         (advertisement_events_are_labeled, events),
+        (past_events_do_not_have_virtual_event_type, events),
         (all_appointments_have_a_type, appts),
         (past_appointments_have_finalized_status, appts)
     ])
