@@ -58,7 +58,7 @@ def _get_event_prefix_error(event: dict) -> Union[dict, None]:
         CAREER_CENTER_PREFIXES = {
             CareerCenters.HOMEWOOD: ['Homewood:'],
             CareerCenters.CAREY: ['Carey:'],
-            CareerCenters.SAIS: ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:'],
+            CareerCenters.SAIS: ['SAIS:', 'SAIS DC:', 'SAIS Europe:', 'HNC:', 'SAIS ALL:'],
             CareerCenters.PDCO: ['PDCO:'],
             CareerCenters.NURSING: ['Nursing:'],
             CareerCenters.BSPH: ['BSPH:'],

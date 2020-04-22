@@ -194,6 +194,11 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
                 EventFields.CAREER_CENTER: CareerCenters.SAIS
             },
             {
+                EventFields.ID: "288213",
+                EventFields.NAME: "SAIS ALL: Webinar",
+                EventFields.CAREER_CENTER: CareerCenters.SAIS
+            },
+            {
                 EventFields.ID: '239094',
                 EventFields.NAME: 'HNC: Group Coaching Appointment 3',
                 EventFields.CAREER_CENTER: CareerCenters.SAIS
