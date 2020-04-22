@@ -9,10 +9,12 @@ from src.rules.event_rules import (
     events_are_invite_only_iff_not_university_wide,
     _build_invite_only_error_message,
     advertisement_events_are_labeled,
-    _build_ad_error_message,
     past_events_do_not_have_virtual_event_type
 )
 from test.common import assertContainsErrorIDs, assertIsVerified
+
+IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
 
 
 class TestEventsArePrefixedCorrectly(unittest.TestCase):
@@ -296,8 +298,6 @@ class TestEventsArePrefixedCorrectly(unittest.TestCase):
 
 
 class TestEventsAreInviteOnly(unittest.TestCase):
-    IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
-    IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
 
     def test_no_data(self):
         assertIsVerified(self, events_are_invite_only_iff_not_university_wide([]))
@@ -309,14 +309,14 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.NAME: "McKinsey Virtual Session",
                 EventFields.CAREER_CENTER: None,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "4625224",
                 EventFields.NAME: "CIA Recruitment Event",
                 EventFields.CAREER_CENTER: None,
                 EventFields.IS_INVITE_ONLY: 'Yes',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
         ]
         assertIsVerified(self, events_are_invite_only_iff_not_university_wide(event_data))
@@ -328,21 +328,21 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.NAME: "University-Wide: Consulting Alumni Panel",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "9892820",
                 EventFields.NAME: "University-Wide: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "8290282",
                 EventFields.NAME: "University-Wide: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
                 EventFields.IS_INVITE_ONLY: 'Yes',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['8290282'], events_are_invite_only_iff_not_university_wide(event_data))
@@ -354,21 +354,21 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.NAME: "Homewood: Consulting Alumni Panel",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "150925098",
                 EventFields.NAME: "Carey: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "95739393",
                 EventFields.NAME: "PDCO: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
                 EventFields.IS_INVITE_ONLY: 'Yes',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['38305945', '150925098'], events_are_invite_only_iff_not_university_wide(event_data))
@@ -380,28 +380,28 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.NAME: "CANCELLED: University-Wide: 2019 JumpStart STEM Diversity Forum",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
                 EventFields.IS_INVITE_ONLY: 'Yes',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "8563254",
                 EventFields.NAME: "CANCELLED: Carey: Drop-in Mondays HE September 9th Afternoon",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
                 EventFields.IS_INVITE_ONLY: 'Yes',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "902820",
                 EventFields.NAME: "CANCELLED: University-Wide: Career Clinic: Job Negotiation",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
             {
                 EventFields.ID: "2635346",
                 EventFields.NAME: "CANCELLED: SAIS DC: SAISLeads Retreat",
                 EventFields.CAREER_CENTER: CareerCenters.SAIS,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
             },
         ]
         assertContainsErrorIDs(self, ['353242', '2635346'], events_are_invite_only_iff_not_university_wide(event_data))
@@ -413,14 +413,14 @@ class TestEventsAreInviteOnly(unittest.TestCase):
                 EventFields.NAME: "Homewood: Consulting Alumni Panel",
                 EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_PAST
+                EventFields.START_DATE_TIME: IN_THE_PAST
             },
             {
                 EventFields.ID: "150925098",
                 EventFields.NAME: "Carey: Resume Workshop",
                 EventFields.CAREER_CENTER: CareerCenters.CAREY,
                 EventFields.IS_INVITE_ONLY: 'No',
-                EventFields.START_DATE_TIME: self.IN_THE_PAST
+                EventFields.START_DATE_TIME: IN_THE_PAST
             },
         ]
         assertIsVerified(self, events_are_invite_only_iff_not_university_wide(event_data))
@@ -438,90 +438,119 @@ class TestEventsAreInviteOnly(unittest.TestCase):
 
 class TestAdvertisementsAreLabeledCorrectly(unittest.TestCase):
 
-    def test_rule_flags_homewood_office_hours_events(self):
-        event_data = [
-            {
-                EventFields.ID: "288569",
-                EventFields.NAME: "Homewood: WSE Office Hours",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Other',
-                EventFields.LABELS_LIST: ''
-            },
-            {
-                EventFields.ID: "331585",
-                EventFields.NAME: "Homewood: office hours with Tessa",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Other',
-                EventFields.LABELS_LIST: 'hwd: stem'
-            },
-            {
-                EventFields.ID: "333931",
-                EventFields.NAME: "Homewood: Job Negotiation Workshop",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Workshop',
-                EventFields.LABELS_LIST: ''
-            },
-        ]
-        assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
-
-    def test_with_multiple_labels(self):
-        event_data = [
-            {
-                EventFields.ID: "331585",
-                EventFields.NAME: "Homewood: office Hours with Tessa",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Other',
-                EventFields.LABELS_LIST: 'hwd: stem, shared: advertisement, hwd: virtual'
-            }
-        ]
-        assertIsVerified(self, advertisement_events_are_labeled(event_data))
-
-    def test_rule_flags_events_with_wrong_event_type(self):
-        event_data = [
-            {
-                EventFields.ID: "288569",
-                EventFields.NAME: "Homewood: WSE Office Hours",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Group Appointment',
-                EventFields.LABELS_LIST: ''
-            },
-            {
-                EventFields.ID: "331585",
-                EventFields.NAME: "Homewood: office hours with Tessa",
-                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-                EventFields.EVENT_TYPE: 'Workshop',
-                EventFields.LABELS_LIST: 'shared: advertisement'
-            },
-        ]
-        assertContainsErrorIDs(self, ['288569', '331585'], advertisement_events_are_labeled(event_data))
-
-    def test_doesnt_flag_non_homewood_office_hours(self):
-        event_data = [
+    def test_non_homewood_events_are_ok(self):
+        events = [
             {
                 EventFields.ID: "331585",
                 EventFields.NAME: "PDCO: Office Hours",
                 EventFields.CAREER_CENTER: CareerCenters.PDCO,
                 EventFields.EVENT_TYPE: 'Workshop',
-                EventFields.LABELS_LIST: ''
+                EventFields.LABELS_LIST: '',
+                EventFields.START_DATE_TIME: IN_THE_PAST
             },
         ]
-        assertIsVerified(self, advertisement_events_are_labeled(event_data))
+        assertIsVerified(self, advertisement_events_are_labeled(events))
 
-    def test_ad_error_message(self):
-        event = {
-            EventFields.ID: "288569",
-            EventFields.NAME: "Homewood: WSE Office Hours",
-            EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
-            EventFields.EVENT_TYPE: 'Group Appointment',
-            EventFields.LABELS_LIST: ''
-        }
-        expected = 'Event 288569 (Homewood: WSE Office Hours) should be labeled "shared: advertisement" and have event type "Other"'
-        self.assertEqual(expected, _build_ad_error_message(event))
+    def test_homewood_events_without_office_hours_in_the_name_are_ok(self):
+        events = [
+            {
+                EventFields.ID: "333931",
+                EventFields.NAME: "Homewood: Job Negotiation Workshop",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Workshop',
+                EventFields.LABELS_LIST: '',
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
+            },
+        ]
+        assertIsVerified(self, advertisement_events_are_labeled(events))
+
+    def test_homewood_office_hours_with_the_advertisement_label_and_event_type_of_other_are_ok(self):
+        events = [
+            {
+                EventFields.ID: "333931",
+                EventFields.NAME: "Homewood: Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Other',
+                EventFields.LABELS_LIST: 'shared: in-person, shared: advertisement',
+                EventFields.START_DATE_TIME: IN_THE_PAST
+            },
+        ]
+        assertIsVerified(self, advertisement_events_are_labeled(events))
+
+    def test_homewood_office_hours_without_the_advertisement_label_are_not_ok(self):
+        events = [
+            {
+                EventFields.ID: "333931",
+                EventFields.NAME: "Homewood: STEM Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Other',
+                EventFields.LABELS_LIST: 'shared: in-person',
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
+            },
+        ]
+        result = advertisement_events_are_labeled(events)
+        assertContainsErrorIDs(self, ['333931'], result)
+        self.assertEqual('Event 333931 (Homewood: STEM Office Hours) should be labeled "shared: advertisement"', result.errors[0]['error_msg'])
+
+    def test_homewood_office_hours_without_an_event_type_of_other_are_not_ok(self):
+        events = [
+            {
+                EventFields.ID: "948648",
+                EventFields.NAME: "Homewood: KSAS Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Group Appointment',
+                EventFields.LABELS_LIST: 'shared: in-person, shared: advertisement',
+                EventFields.START_DATE_TIME: IN_THE_PAST
+            },
+        ]
+        result = advertisement_events_are_labeled(events)
+        assertContainsErrorIDs(self, ['948648'], result)
+        self.assertEqual('Event 948648 (Homewood: KSAS Office Hours) should have event type "Other"', result.errors[0]['error_msg'])
+
+    def test_homewood_office_hours_without_correct_label_or_event_type_produce_a_compound_error_message(self):
+        events = [
+            {
+                EventFields.ID: "948648",
+                EventFields.NAME: "Homewood: KSAS Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Group Appointment',
+                EventFields.LABELS_LIST: '',
+                EventFields.START_DATE_TIME: IN_THE_PAST
+            },
+        ]
+        actual_error_msg = advertisement_events_are_labeled(events).errors[0]['error_msg']
+        self.assertEqual('Event 948648 (Homewood: KSAS Office Hours) should be labeled "shared: advertisement" and have event type "Other"', actual_error_msg)
+
+    def test_upcoming_homewood_office_hours_with_the_event_type_virtual_session_are_ok(self):
+        events = [
+            {
+                EventFields.ID: "333931",
+                EventFields.NAME: "Homewood: Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Virtual Session',
+                EventFields.LABELS_LIST: 'shared: in-person, shared: advertisement',
+                EventFields.START_DATE_TIME: IN_THE_FUTURE
+            },
+        ]
+        assertIsVerified(self, advertisement_events_are_labeled(events))
+
+    def test_past_homewood_office_hours_with_the_event_type_virtual_session_are_not_ok(self):
+        events = [
+            {
+                EventFields.ID: "948648",
+                EventFields.NAME: "Homewood: Office Hours",
+                EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
+                EventFields.EVENT_TYPE: 'Virtual Session',
+                EventFields.LABELS_LIST: 'shared: in-person, shared: advertisement',
+                EventFields.START_DATE_TIME: IN_THE_PAST
+            },
+        ]
+        result = advertisement_events_are_labeled(events)
+        assertContainsErrorIDs(self, ['948648'], result)
+        self.assertEqual('Event 948648 (Homewood: Office Hours) should have event type "Other"', result.errors[0]['error_msg'])
 
 
 class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
-    IN_THE_FUTURE = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
-    IN_THE_PAST = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
 
     def test_events_without_the_virtual_event_type_are_ok(self):
         events = [{
@@ -529,7 +558,7 @@ class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
             EventFields.NAME: '',
             EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
             EventFields.EVENT_TYPE: 'Info Session',
-            EventFields.START_DATE_TIME: self.IN_THE_PAST
+            EventFields.START_DATE_TIME: IN_THE_PAST
         }]
         assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
 
@@ -539,7 +568,7 @@ class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
             EventFields.NAME: '',
             EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
             EventFields.EVENT_TYPE: 'Virtual Session',
-            EventFields.START_DATE_TIME: self.IN_THE_FUTURE
+            EventFields.START_DATE_TIME: IN_THE_FUTURE
         }]
         assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
 
@@ -549,7 +578,7 @@ class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
             EventFields.NAME: '',
             EventFields.CAREER_CENTER: None,
             EventFields.EVENT_TYPE: 'Virtual Session',
-            EventFields.START_DATE_TIME: self.IN_THE_PAST
+            EventFields.START_DATE_TIME: IN_THE_PAST
         }]
         assertIsVerified(self, past_events_do_not_have_virtual_event_type(events))
 
@@ -559,7 +588,7 @@ class TestPastEventsDoNotHaveVirtualEventType(unittest.TestCase):
             EventFields.NAME: 'Homewood: Deloitte Info Session',
             EventFields.CAREER_CENTER: CareerCenters.HOMEWOOD,
             EventFields.EVENT_TYPE: 'Virtual Session',
-            EventFields.START_DATE_TIME: self.IN_THE_PAST
+            EventFields.START_DATE_TIME: IN_THE_PAST
         }]
         result = past_events_do_not_have_virtual_event_type(events)
         assertContainsErrorIDs(self, ['354987'], result)

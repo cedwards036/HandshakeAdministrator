@@ -92,23 +92,21 @@ def _build_invite_only_error_message(event: dict, should_be_invite_only: bool) -
 
 
 def _get_invite_error(event: dict) -> Union[dict, None]:
-    def _event_is_upcoming(event: dict) -> bool:
-        return datetime.strptime(event[EventFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S') > datetime.now()
 
     def _event_is_invite_only(event: dict) -> bool:
         return event[EventFields.IS_INVITE_ONLY] == 'Yes'
 
     def _get_error_dict(event: dict) -> Union[dict, None]:
         cleaned_event_name = _strip_cancelled_prefix_from_event_name(event[EventFields.NAME])
-        if _event_is_upcoming(event):
+        if is_past_event(event):
+            return None
+        else:
             if _event_is_university_wide(cleaned_event_name) and _event_is_invite_only(event):
                 return _build_invite_only_error_dict(event, should_be_invite_only=False)
             elif not (_event_is_university_wide(cleaned_event_name) or _event_is_invite_only(event)):
                 return _build_invite_only_error_dict(event, should_be_invite_only=True)
             else:
                 return None
-        else:
-            return None
 
     def _build_invite_only_error_dict(event: dict, should_be_invite_only: bool) -> dict:
         return {
@@ -121,36 +119,35 @@ def _get_invite_error(event: dict) -> Union[dict, None]:
     else:
         return _get_error_dict(event)
 
-
-def _event_has_ad_label(event: dict) -> bool:
-    return 'shared: advertisement' in event[EventFields.LABELS_LIST]
-
-
-def _event_has_wrong_type(event: dict) -> bool:
-    return event[EventFields.EVENT_TYPE] != 'Other'
-
-
-def _build_ad_error_message(event: dict) -> str:
-    base_error_str = f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should'
-    label_error_substr = 'be labeled "shared: advertisement"'
-    type_error_substr = 'have event type "Other"'
-    if (not _event_has_ad_label(event)) and _event_has_wrong_type(event):
-        return f'{base_error_str} {label_error_substr} and {type_error_substr}'
-    elif _event_has_wrong_type(event):
-        return f'{base_error_str} {type_error_substr}'
-    else:
-        return f'{base_error_str} {label_error_substr}'
-
-
 def _get_ad_error(event: dict) -> Union[dict, None]:
-    def _event_is_office_hours_ad(event: dict) -> bool:
+    def _event_is_office_hours(event: dict) -> bool:
         return 'office hours' in event[EventFields.NAME].lower()
 
     def _event_is_homewood(event: dict) -> bool:
         return event[EventFields.CAREER_CENTER] == 'Life Design Lab (Homewood)'
 
     def _event_is_ad(event: dict) -> bool:
-        return _event_is_homewood(event) and _event_is_office_hours_ad(event)
+        return _event_is_homewood(event) and _event_is_office_hours(event)
+
+    def _event_has_ad_label(event: dict) -> bool:
+        return 'shared: advertisement' in event[EventFields.LABELS_LIST]
+
+    def _event_has_wrong_type(event: dict) -> bool:
+        if event[EventFields.EVENT_TYPE] != 'Other':
+            return is_past_event(event) or event[EventFields.EVENT_TYPE] != 'Virtual Session'
+        else:
+            return False
+
+    def _build_ad_error_message(event: dict) -> str:
+        base_error_str = f'Event {event[EventFields.ID]} ({event[EventFields.NAME]}) should'
+        label_error_substr = 'be labeled "shared: advertisement"'
+        type_error_substr = 'have event type "Other"'
+        if (not _event_has_ad_label(event)) and _event_has_wrong_type(event):
+            return f'{base_error_str} {label_error_substr} and {type_error_substr}'
+        elif _event_has_wrong_type(event):
+            return f'{base_error_str} {type_error_substr}'
+        else:
+            return f'{base_error_str} {label_error_substr}'
 
     def _build_error_dict(event: dict) -> dict:
         return {
@@ -158,7 +155,7 @@ def _get_ad_error(event: dict) -> Union[dict, None]:
             'error_msg': _build_ad_error_message(event)
         }
 
-    if _event_is_ad(event) and (not _event_has_ad_label(event) or _event_has_wrong_type(event)):
+    if _event_is_ad(event) and (not _event_has_ad_label(event) or (_event_has_wrong_type(event))):
         return _build_error_dict(event)
     else:
         return None
@@ -167,9 +164,6 @@ def _get_ad_error(event: dict) -> Union[dict, None]:
 def _get_virtual_session_error(event: dict) -> Union[dict, None]:
     def is_virtual_session(event: dict) -> bool:
         return event[EventFields.EVENT_TYPE] == 'Virtual Session'
-
-    def is_past_event(event: dict) -> bool:
-        return datetime.strptime(event[EventFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S') < datetime.now()
 
     def is_external_event(event: dict) -> bool:
         return not event[EventFields.CAREER_CENTER]
@@ -185,6 +179,9 @@ def _get_virtual_session_error(event: dict) -> Union[dict, None]:
     else:
         return None
 
+
+def is_past_event(event: dict) -> bool:
+    return datetime.strptime(event[EventFields.START_DATE_TIME], '%Y-%m-%d %H:%M:%S') < datetime.now()
 
 ###########################
 # GENERAL HELPER FUNCTIONS
