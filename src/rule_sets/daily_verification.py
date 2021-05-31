@@ -15,12 +15,12 @@ from src.rules.event_rules import (
     advertisement_events_are_labeled,
     past_events_do_not_have_virtual_event_type
 )
-from src.utils import (write_to_file, BrowsingSession, create_filepath_in_download_dir,
+from src.utils import (write_to_file, create_filepath_in_download_dir,
                        get_datestamped_filename, read_and_delete_json, config)
 from src.verification_report import verify_rules, create_error_csv, VerificationReport
 
-EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vZXZlbnRzP3FpZD0wbU9oNkdmYklkRlN6enYweHpiempFJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
-APPTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/explore_embed?insights_page=ZXhwbG9yZS9nZW5lcmF0ZWRfaGFuZHNoYWtlX3Byb2R1Y3Rpb24vYXBwb2ludG1lbnRzP3FpZD0xYTJpcktJSlFhR0loNTl5eVJHTkhnJmVtYmVkX2RvbWFpbj1odHRwczolMkYlMkZhcHAuam9pbmhhbmRzaGFrZS5jb20mdG9nZ2xlPWZpbA=='
+EVENTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/reports/new?looker_explore_name=events&qid=Px5MNaPitl7UnHHxoebDUY'
+APPTS_INSIGHTS_LINK = 'https://app.joinhandshake.com/analytics/reports/new?looker_explore_name=appointments&qid=CaUfmA5D75NHxky8RrLEb1'
 
 REPORT_FILEPATH = create_filepath_in_download_dir(f'{get_datestamped_filename("daily_rule_verification_results")}.txt')
 APPT_STATUS_CSV_FILEPATH = create_filepath_in_download_dir(f'{get_datestamped_filename("appt_status_errors")}.csv')
@@ -66,8 +66,3 @@ def _write_error_csvs(verification_results: List[VerificationResult], output_dir
     for result in verification_results:
         if not result.is_verified:
             create_error_csv(result, output_dir)
-
-
-if __name__ == '__main__':
-    with BrowsingSession(chromedriver_path='../chromedriver.exe') as browser:
-        daily_verification(browser)

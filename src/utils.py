@@ -1,7 +1,5 @@
 import json
 import os
-import subprocess
-import sys
 from csv import DictWriter
 from datetime import datetime
 from getpass import getuser
@@ -14,60 +12,32 @@ CONFIG_FILE_NAME = 'config.json'
 CONFIG_FILEPATH = f'{CONFIG_DIR}\\{CONFIG_FILE_NAME}'
 
 
-def _create_default_config():
-    username = getuser()
-    config = {
-        "handshake_url": "https://jhu.joinhandshake.com",
-        "handshake_email": f"{username}@jhu.edu",
-        "download_dir": f"C:\\Users\\{username}\\Downloads"
-    }
-    if not (os.path.exists(CONFIG_DIR) and os.path.isdir(CONFIG_DIR)):
-        os.mkdir(CONFIG_DIR)
-    if not (os.path.exists(CONFIG_FILEPATH) and os.path.isfile(CONFIG_FILEPATH)):
-        with open(CONFIG_FILEPATH, 'w') as file:
-            json.dump(config, file)
-
-
 def load_config():
     """
     Load the configuration file
     :return: a dict of config values
     """
-    _create_default_config()
-    with open(CONFIG_FILEPATH, 'r') as file:
-        return json.load(file)
-
-
-def open_config_for_editing():
-    """
-    Open the config file in the default text editor for manual editing.
-    """
-    subprocess.run(['start', CONFIG_FILEPATH], check=True, shell=True)
-    return CONFIG_FILEPATH
+    username = getuser()
+    return {
+        "handshake_url": "https://jhu.joinhandshake.com",
+        "handshake_email": f"{username}@jhu.edu",
+        "download_dir": f"C:\\Users\\{username}\\Downloads"
+        , "chromedriver_path": "./src/chromedriver.exe"
+    }
 
 
 config = load_config()
 
 
-def _get_chromedriver_path() -> str:
-    if getattr(sys, 'frozen', False):
-        # executed as a bundled exe, the driver is in the extracted folder
-        return os.path.join(sys._MEIPASS, "src", "chromedriver.exe")
-    else:
-        # executed as a simple script, the driver should be in `PATH`
-        return "./chromedriver.exe"
-
-
 class BrowsingSession(HandshakeSession):
     """
-    A wrapper class around HandshakeSession that always logs into the account
-    specified in the config file.
+    A wrapper class around HandshakeSession with default values
     """
 
-    def __init__(self, password=None, max_wait_time=300, chromedriver_path=_get_chromedriver_path()):
-        super().__init__(config['handshake_url'], config['handshake_email'],
+    def __init__(self, password=None, max_wait_time=300):
+        super().__init__(login_url=config['handshake_url'], email=config['handshake_email'],
                          password=password, download_dir=config['download_dir'],
-                         max_wait_time=max_wait_time, chromedriver_path=chromedriver_path)
+                         max_wait_time=max_wait_time, chromedriver_path=config['chromedriver_path'])
 
 
 def to_csv(list_of_dicts: List[dict], file_path: str):

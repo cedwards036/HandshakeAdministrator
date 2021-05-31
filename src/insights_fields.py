@@ -4,7 +4,7 @@ class AppointmentFields:
     END_DATE_TIME = 'Appointments End Date Time'
     MEDIUM = 'Appointment Medium Name'
     TYPE_LENGTH = 'Appointment Type Length (Minutes)'
-    TYPE = 'Appointment Type Name'
+    TYPE = 'Appointment Types Name'
     STATUS = 'Appointments Status'
     STAFF_MEMBER_EMAIL = 'Staff Member Email'
     STAFF_MEMBER_FIRST_NAME = 'Staff Member First Name'

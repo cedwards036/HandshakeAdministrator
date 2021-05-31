@@ -13,7 +13,45 @@ from src.data_download_functions import (download_appointment_type_settings,
                                          download_staff)
 from src.job_label_parser import run_job_labels_report
 from src.rule_sets.daily_verification import daily_verification
-from src.utils import BrowsingSession, open_config_for_editing
+from src.utils import BrowsingSession
+
+
+def main():
+    actions = [
+        {'name': 'Run Daily Rule Verification', 'function': daily_verification},
+        {'name': 'Download Appointment Type Settings', 'function': download_appointment_type_settings},
+        {'name': 'Download Label Settings', 'function': download_label_settings_data},
+        {'name': 'Download Major Mapping', 'function': download_major_mapping},
+        {'name': 'Download Pending Student Requests', 'function': download_pending_student_requests},
+        {'name': 'Download Rejected Student Requests', 'function': download_rejected_student_requests},
+        {'name': 'Run Jobs Labels Report', 'function': run_job_labels_report},
+        {'name': 'Download Staff', 'function': download_staff},
+        {'name': 'Exit Program', 'function': exit_program}
+    ]
+
+    print('HandshakeAdministrator')
+    print('======================\n')
+    program_is_running = True
+    while program_is_running:
+        do_not_restart_browser = True
+        password = getpass(prompt='Please enter your Handshake password: ')
+        with BrowsingSession(password) as browser:
+            while do_not_restart_browser:
+                try:
+                    user_selection = get_user_selection(actions)
+                    perform_action(actions, user_selection, browser)
+                    print()  # blank line for formatting
+                except SystemExit:
+                    do_not_restart_browser = False
+                    program_is_running = False
+                except (NoSuchElementError, InsufficientPermissionsError, InvalidPasswordError, BrowserTimeoutError,
+                        InvalidUserTypeError, InvalidEmailError) as e:
+                    user_wants_to_try_again = input(
+                        'The program encountered an error. Would you like to try again? (y / n): ').lower() == 'y'
+                    if not user_wants_to_try_again:
+                        print_goodbye_message()
+                        program_is_running = False
+                    do_not_restart_browser = False
 
 
 def get_user_selection(actions: List[dict]) -> int:
@@ -49,50 +87,10 @@ def print_goodbye_message():
     print('Goodbye!')
 
 
-def open_config_file(*args):
-    print('Any changes to the config file will take effect the next time you launch the program.')
-    return open_config_for_editing()
-
-
 def exit_program(*args):
     print_goodbye_message()
     sys.exit(0)
 
 
 if __name__ == '__main__':
-    actions = [
-        {'name': 'Run Daily Rule Verification', 'function': daily_verification},
-        {'name': 'Download Appointment Type Settings', 'function': download_appointment_type_settings},
-        {'name': 'Download Label Settings', 'function': download_label_settings_data},
-        {'name': 'Download Major Mapping', 'function': download_major_mapping},
-        {'name': 'Download Pending Student Requests', 'function': download_pending_student_requests},
-        {'name': 'Download Rejected Student Requests', 'function': download_rejected_student_requests},
-        {'name': 'Run Jobs Labels Report', 'function': run_job_labels_report},
-        {'name': 'Download Staff', 'function': download_staff},
-        {'name': 'Open Config File', 'function': open_config_file},
-        {'name': 'Exit Program', 'function': exit_program}
-    ]
-
-    print('HandshakeAdministrator')
-    print('======================\n')
-    program_is_running = True
-    while program_is_running:
-        do_not_restart_browser = True
-        password = getpass(prompt='Please enter your Handshake password: ')
-        with BrowsingSession(password) as browser:
-            while do_not_restart_browser:
-                try:
-                    user_selection = get_user_selection(actions)
-                    perform_action(actions, user_selection, browser)
-                    print()  # blank line for formatting
-                except SystemExit:
-                    do_not_restart_browser = False
-                    program_is_running = False
-                except (NoSuchElementError, InsufficientPermissionsError, InvalidPasswordError, BrowserTimeoutError,
-                        InvalidUserTypeError, InvalidEmailError) as e:
-                    user_wants_to_try_again = input(
-                        'The program encountered an error. Would you like to try again? (y / n): ').lower() == 'y'
-                    if not user_wants_to_try_again:
-                        print_goodbye_message()
-                        program_is_running = False
-                    do_not_restart_browser = False
+    main()

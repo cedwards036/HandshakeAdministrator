@@ -1,7 +1,0 @@
-From inside the 'src' directory, execute:
-
-    pyinstaller --onefile main.spec
-
-Make sure that main.spec has the following configurations:
-
-binaries=[('chromedriver.exe', 'app')],

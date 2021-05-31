@@ -2,7 +2,7 @@ class CareerCenters:
     HOMEWOOD = 'Life Design Lab (Homewood)'
     CAREY = 'Carey Business School Career Development Office'
     SAIS = 'SAIS Global Careers'
-    PDCO = 'Professional Development and Career Office (SOM, SON, BSPH)'
+    PDCO = 'Professional Development and Career Office (SOM and BSPH)'
     NURSING = 'School of Nursing Career Lab'
     BSPH = 'Bloomberg School of Public Health Career Services Office'
     PEABODY = 'Peabody Career Services (LAUNCHPad)'
